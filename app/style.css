@@ -236,7 +236,7 @@ font-size: 0.9rem;
 
 /* animation */
 .fade-in {
-    animation: fadeIn 0.5s ease-in-out forwards;
+    animation: fadeIn 0.8s ease-in-out forwards;
 }
 
 @keyframes fadeIn {
