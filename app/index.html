@@ -9,6 +9,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     </head>
     <body>
@@ -21,20 +22,19 @@
             <div class="content">
                 <h1>Lab Scheduler</h1>
                 <h2>Fidelis Senior High | NSC</h2>
-
                 <div id="selection-view">
                     <p>Choose your occupancy</p>
                     <div class="toggle">
-                        <button class="Active">Admin</button>
-                        <button>User</button>
+                        <button class="active" onclick="handleSelection(this)">Teacher</button>
+                        <button onclick="handleSelection(this)">Student</button>
                     </div>
                 </div>
 
                 <div id="login-view" style="display: none;">
                     <p class="login-subtext">Sign in or sign up for free <br> with your school email</p>
 
-                    <button class="google_btn">
-                        <img src="" alt="">
+                    <button class="google-btn">
+                        <img src="../public/google.png" alt="" width="18px">
                         Continue with Google
                     </button>
 
@@ -42,8 +42,14 @@
 
                     <input type="email" placeholder="studentid@firstasia.edu.ph" class="login-input">
                     <button class="enter-btn">Enter</button>
+
+                    <div class="back-navigation">
+                        <button class="back-btn" onclick="goBack()">
+                            <i class="fa-solid fa-chevron-left"></i> </button>
+                    </div>
                 </div>
             </div>
+            <!-- right side content -->
             <div class="image-container">
                 <img src="../public/nsc_bldg.png" alt="NSC Building">
             </div>
@@ -51,7 +57,36 @@
         </section>
     </body>
 
+    <!-- jscript -->
     <script>
+        function handleSelection(clickedBtn) {
+            const selectionView = document.getElementById('selection-view');
+            const loginView = document.getElementById('login-view');
 
+            const buttons = document.querySelectorAll('.toggle button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            selectionView.style.display = 'none';
+            loginView.style.display = 'flex';
+            loginView.classList.add('fade-in');
+
+            setTimeout(() => {
+                loginView.classList.remove('fade-in');
+            }, 400);
+        }
+
+        function goBack() {
+            const selectionView = document.getElementById('selection-view');
+            const loginView = document.getElementById('login-view');
+
+            loginView.style.display = 'none';
+    
+            selectionView.style.display = 'flex';
+            selectionView.classList.add('fade-in');
+
+            setTimeout(() => {
+                selectionView.classList.remove('fade-in');
+            }, 400);
+        }
     </script>  
 </html>
