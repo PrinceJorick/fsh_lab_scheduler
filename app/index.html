@@ -25,8 +25,8 @@
                 <div id="selection-view">
                     <p>Choose your occupancy</p>
                     <div class="toggle">
-                        <button class="active" onclick="handleSelection(this)">Admin</button>
-                        <button onclick="handleSelection(this)">User</button>
+                        <button class="Active">Admin</button>
+                        <button>User</button>
                     </div>
                 </div>
 
@@ -42,15 +42,6 @@
     </body>
 
     <script>
-        const buttons = document.querySelectorAll('.toggle button');
 
-        buttons.forEach(button => {
-            button.addEventListener('click', () => {
-                // remove active class from all buttons
-                buttons.forEach(btn => btn.classList.remove('active'));
-                // add active class to the clicked button
-                button.classList.add('active');
-            });
-        });
     </script>  
 </html>
