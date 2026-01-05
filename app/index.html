@@ -32,4 +32,17 @@
         </div>
         </section>
     </body>
+
+    <script>
+        const buttons = document.querySelectorAll('.toggle button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                // remove active class from all buttons
+                buttons.forEach(btn => btn.classList.remove('active'));
+                // add active class to the clicked button
+                button.classList.add('active');
+            });
+        });
+    </script>  
 </html>
