@@ -1,9 +1,12 @@
 let selectedRole = "";
 
+// --- LOGIN PAGE LOGIC ---
 function handleSelection(clickedBtn) {
     const selectionView = document.getElementById('selection-view');
     const loginView = document.getElementById('login-view');
     const emailInput = document.querySelector('.login-input');
+
+    if (!selectionView || !loginView) return; // safety check
 
     selectedRole = clickedBtn.innerText;
     emailInput.placeholder = selectedRole === "Teacher" 
@@ -14,9 +17,7 @@ function handleSelection(clickedBtn) {
     loginView.style.display = 'flex';
     loginView.classList.add('fade-in');
 
-    setTimeout(() => {
-        loginView.classList.remove('fade-in');
-    }, 800);
+    setTimeout(() => loginView.classList.remove('fade-in'), 800);
 }
 
 function goBack() {
@@ -24,47 +25,71 @@ function goBack() {
     const loginView = document.getElementById('login-view');
     const emailInput = document.querySelector('.login-input');
 
-    // reset input state
-    emailInput.classList.remove('input-error');
-    emailInput.value = "";
+    if (emailInput) {
+        emailInput.classList.remove('input-error');
+        emailInput.value = "";
+    }
 
     loginView.style.display = 'none';
     selectionView.style.display = 'flex';
     selectionView.classList.add('fade-in');
 
-    setTimeout(() => {
-        selectionView.classList.remove('fade-in');
-    }, 800);
+    setTimeout(() => selectionView.classList.remove('fade-in'), 800);
 }
 
-// logic for enter button
+// logic for Enter Button
 const enterBtn = document.querySelector('.enter-btn');
 const emailInput = document.querySelector('.login-input');
 
-enterBtn.addEventListener('click', () => {
-    const email = emailInput.value.trim().toLowerCase();
+if (enterBtn && emailInput) {
+    enterBtn.addEventListener('click', () => {
+        const email = emailInput.value.trim().toLowerCase();
 
-    // check if school email
-    if (!email.endsWith('@firstasia.edu.ph')) {
-        
-        // stop the redir and show error
-        emailInput.classList.add('input-error');
-        emailInput.value = ""; 
-        emailInput.placeholder = "Access Denied: Use school email";
-        
-        console.log("Validation Failed: This is a " + email.split('@')[1] + " account.");
+        if (!email.endsWith('@firstasia.edu.ph')) {
+            emailInput.classList.add('input-error');
+            emailInput.value = ""; 
+            emailInput.placeholder = "Access Denied: Use school email";
+            console.log("Validation Failed.");
+        } else {
+            localStorage.setItem('fsh_user_email', email);
+            localStorage.setItem('fsh_user_role', selectedRole);
+            window.location.href = "dashboard.html"; 
+        }
+    });
 
-    } else {
-        // if correct
-        localStorage.setItem('fsh_user_email', email);
-        localStorage.setItem('fsh_user_role', selectedRole);
+    emailInput.addEventListener('input', () => {
+        emailInput.classList.remove('input-error');
+    });
+}
 
-        console.log("Login successful. Redirecting...");
-        window.location.href = "scheduler.html"; 
+// --- DASHBOARD PAGE LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    // only run if on scheduler page
+    if (window.location.pathname.includes("dashboard.html")) {
+        const email = localStorage.getItem('fsh_user_email');
+        const role = localStorage.getItem('fsh_user_role');
+
+        // security check
+        if (!email) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        const userDisplay = document.getElementById('user-display');
+        if (userDisplay) {
+            const userName = email.split('@')[0];
+            userDisplay.innerText = `${userName} (${role})`;
+        }
     }
 });
 
-// remove error color when user types
-emailInput.addEventListener('input', () => {
-    emailInput.classList.remove('input-error');
-});
+// global functions
+function logout() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+
+function selectLab(labName) {
+    console.log("Lab selected: " + labName);
+    // future thing, disregard for now; window.location.href = `booking.html?lab=${labName}`;
+}

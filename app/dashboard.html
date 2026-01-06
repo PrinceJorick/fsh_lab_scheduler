@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <meta name="description" content="">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    </head>
+    <body>
+        <div class="dashboard-container">
+            <header class="dash-nav">
+                <nav>
+                    <a href="index.html"><img src="../public/fsh_logo_black.png"></a>
+                </nav>
+            </header>
+
+            <main class="main-content">
+                <header>
+                    <h1 id="welcome-title">Dashboard</h1>
+                    <p id="user-display"></p>
+                </header>
+
+                <div class="lab-grid">
+                    <div class="lab-card" onclick="selectLab('Computer Laboratory')">
+                        <div class="lab-image"></div>
+                        <div class="lab-info">
+                            <span>First floor</span>
+                            <h3>Computer Laboratory</h3>
+                        </div>
+                    </div>
+                    <div class="lab-card" onclick="selectLab('General Science Laboratory')">
+                        <div class="lab-image"></div>
+                        <div class="lab-info">
+                            <span>Second floor</span>
+                            <h3>General Science Laboratory</h3>
+                        </div>
+                    </div>
+                    <div class="lab-card" onclick="selectLab('Clinical Laboratory')">
+                        <div class="lab-image"></div>
+                        <div class="lab-info">
+                            <span>First floor</span>
+                            <h3>Clinical Laboratory</h3>
+                        </div>
+                    </div>
+                    <div class="lab-card" onclick="selectLab('Physics Laboratory')">
+                        <div class="lab-image"></div>
+                        <div class="lab-info">
+                            <span>Second floor</span>
+                            <h3>Physics Laboratory</h3>
+                        </div>
+                    </div>                   
+                </div>
+            </main>
+        </div>
+        
+        <script src="script.js"></script>
+    </body>
+</html>
