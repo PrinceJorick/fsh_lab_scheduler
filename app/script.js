@@ -57,6 +57,12 @@ if (enterBtn && emailInput) {
         }
     });
 
+    emailInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            enterBtn.click(); // This triggers the click listener you already wrote
+        }
+    });
+
     emailInput.addEventListener('input', () => {
         emailInput.classList.remove('input-error');
     });
