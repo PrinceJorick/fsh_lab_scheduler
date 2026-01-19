@@ -99,3 +99,65 @@ function selectLab(labName) {
     console.log("Lab selected: " + labName);
     // future thing, disregard for now; window.location.href = `booking.html?lab=${labName}`;
 }
+
+// --- GOOGLE SIGN-IN IMPLEMENTATION ---
+
+function handleCredentialResponse(response) {
+    // 1. Decode the Google JWT (JSON Web Token) to get user info
+    const responsePayload = decodeJwtResponse(response.credential);
+
+    console.log("ID: " + responsePayload.sub);
+    console.log("Email: " + responsePayload.email);
+
+    // 2. Validate Domain (matches your existing logic)
+    // Note: 'hd' stands for Hosted Domain (e.g., firstasia.edu.ph)
+    if (responsePayload.hd !== 'firstasia.edu.ph') {
+        alert("Access Denied: Please sign in with your school email (@firstasia.edu.ph).");
+        return;
+    }
+
+    // 3. Save to Local Storage (reusing your existing app logic)
+    // We use the global 'selectedRole' variable you defined at the top of script.js
+    if (!selectedRole) {
+        selectedRole = "Student"; // Default fallback if they didn't click a toggle
+    }
+
+    localStorage.setItem('fsh_user_email', responsePayload.email);
+    localStorage.setItem('fsh_user_role', selectedRole);
+
+    // 4. Redirect to Dashboard
+    window.location.href = "dashboard.html";
+}
+
+// Helper function to decode the JWT token from Google
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+
+// Initialize Google Button when the page loads
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id: "238536479920-v18ac5qcfh6t0vmp8evjk381g4b6ssl4.apps.googleusercontent.com", // PASTE YOUR CLIENT ID HERE
+        callback: handleCredentialResponse
+    });
+    
+    // Render the button inside the div we created in index.html
+    google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { 
+            theme: "filled_black", // Matches your FSH black/white theme
+            size: "large", 
+            shape: "pill",
+            width: "320" // Adjusts width to match your input fields
+        } 
+    );
+    
+    // Optional: Displays the One Tap prompt automatically
+    google.accounts.id.prompt(); 
+};
