@@ -355,3 +355,55 @@ font-size: 0.9rem;
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
 }
+
+/* --- RESPONSIVE DESIGN (Add to bottom of style.css) --- */
+
+@media screen and (max-width: 768px) {
+    /* 1. Fix the Login Page (index.html) */
+    .main-container {
+        flex-direction: column-reverse; /* Puts login form on top, image on bottom */
+        height: auto; /* Allow scrolling on mobile */
+        min-height: 100vh;
+    }
+
+    .image-container {
+        height: 30vh; /* Make image header-sized on mobile */
+        padding: 0;
+        width: 100%;
+    }
+
+    .image-container img {
+        border-radius: 0 0 30px 30px; /* Round only bottom corners */
+    }
+
+    .content {
+        padding: 40px 20px;
+        justify-content: flex-start; /* Aligns content to top */
+    }
+
+    /* 2. Fix the Dashboard Grid (dashboard.html) */
+    .lab-grid {
+        /* Reduce min-width so cards fit on small phones (e.g. iPhone SE) */
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: 20px;
+    }
+
+    /* 3. Adjust Navigation */
+    nav {
+        position: relative; /* Prevents overlap on login page */
+        padding: 15px;
+    }
+
+    .dash-nav {
+        padding: 15px 5%; /* Smaller padding for mobile header */
+    }
+
+    .dashboard-container {
+        padding-top: 100px; /* Ensure content doesn't hide behind fixed nav */
+    }
+
+    /* 4. Typography Adjustments */
+    .content h1, .main-content h1 {
+        font-size: 2rem; /* Smaller headings for mobile */
+    }
+}
