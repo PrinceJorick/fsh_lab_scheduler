@@ -1,4 +1,4 @@
-# **Development of Laboratory Inventory and Borrowing System Web-App for Teachers in Fidelis Senior High and Faith Colleges Tertiary School
+# Development of Laboratory Inventory and Borrowing System Web-App for Teachers in Fidelis Senior High and Faith Colleges Tertiary School
 
 ## Prototype Development
 - Prince Jorick Fajutagana (Leader, UI/UX, Frontend, Backend)
