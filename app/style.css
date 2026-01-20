@@ -13,7 +13,11 @@ nav {
     width: 100%;
     z-index: 10;
     display: flex;
-    padding: 2% 3%;
+    
+    /* CHANGE THIS LINE */
+    /* Old: padding: 2% 3%; */
+    /* New: Fixed 30px top/bottom (stable height), Responsive 5% left/right (adjusts horizontally) */
+    padding: 30px 5%; 
 }
 
 nav img{
@@ -31,6 +35,7 @@ nav img{
 }
 
 /* left sect */
+/* Add padding to the main text container so it doesn't hit the screen edges */
 .content {
     flex: 1;
     width: 100%;
@@ -39,17 +44,21 @@ nav img{
     align-items: center;
     justify-content: center;
     text-align: center;
+    padding: 0 60px; /* NEW: Adds cushion on left/right sides */
 }
 
-.content h1{
-    font-size: 2.5rem;
-    margin-bottom: 1px;
+/* Give the main title space below it */
+.content h1 {
+    font-size: 2.5rem; /* You can increase to 3rem for impact if desired */
+    margin-bottom: 15px; /* CHANGED: Was 1px. Now gives breathing room. */
+    line-height: 1.2;    /* NEW: Prevents letters from overlapping on multiple lines */
 }
 
-.content h2{
+/* Push the buttons further down from the subtitle */
+.content h2 {
     color: #707475;
     font-weight: 400;
-    margin-bottom: 20px;
+    margin-bottom: 40px; /* CHANGED: Was 20px. Pushes the toggle button group away. */
 }
 
 .content p{
@@ -58,11 +67,13 @@ font-size: 0.9rem;
     margin-bottom: 10px;
 }
 
+/* Adjust the specific section holding the toggle buttons */
 #selection-view {
     display: flex;
-    flex-direction: column; 
-    align-items: center;    
+    flex-direction: column;
+    align-items: center;
     width: 100%;
+    gap: 15px; /* NEW: Adds space between the "Choose occupancy" text and buttons */
 }
 
 /* right sect */
@@ -396,7 +407,7 @@ font-size: 0.9rem;
         padding: 20px;
         
         /* The Fade Effect: Solid white at the top, fading to transparent */
-        background: linear-gradient(to bottom, #ffffff 60%, rgba(255, 255, 255, 0) 100%);
+        background: linear-gradient(to bottom, #ffffff 65%, rgba(255, 255, 255, 0) 100%);
         
         /* Adds extra space at the bottom for a longer, smoother fade */
         padding-bottom: 60px; 
