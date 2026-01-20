@@ -16,19 +16,21 @@ html, body {
     font-family: "IBM Plex Sans", sans-serif;
 }
 
-/* nav bar */
+/* nav bar */ 
 nav {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 10;
+    align-items: center;
+    gap: 10px; /* adds space between logo and text */
     display: flex;
     
     /* CHANGE THIS LINE */
     /* Old: padding: 2% 3%; */
     /* New: Fixed 30px top/bottom (stable height), Responsive 5% left/right (adjusts horizontally) */
-    padding: 30px 5%; 
+    padding:10px 3%; 
 }
 
 nav img{
