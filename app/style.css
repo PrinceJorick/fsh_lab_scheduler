@@ -390,8 +390,16 @@ font-size: 0.9rem;
 
     /* 3. Adjust Navigation */
     nav {
-        position: relative; /* Prevents overlap on login page */
-        padding: 15px;
+        /* Change relative to absolute so it overlays the image */
+        position: absolute; 
+        width: 100%;
+        padding: 20px;
+        
+        /* The Fade Effect: Solid white at the top, fading to transparent */
+        background: linear-gradient(to bottom, #ffffff 60%, rgba(255, 255, 255, 0) 100%);
+        
+        /* Adds extra space at the bottom for a longer, smoother fade */
+        padding-bottom: 60px; 
     }
 
     .dash-nav {
