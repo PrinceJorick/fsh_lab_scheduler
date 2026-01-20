@@ -1,58 +1,94 @@
-# Development of Laboratory Inventory and Borrowing System Web-App for Teachers in Fidelis Senior High and Faith Colleges Tertiary School
-
-## Prototype Development
-- Prince Jorick Fajutagana (Leader, UI/UX, Frontend, Backend)
-- Mark Miel Betonio (Frontend, Backend)
-- Will Jairuz Amado (Frontend, Backend)
-
-## Research Paper Making
-- Arianne Solano 
-- Eugene Christ Garcia 
-- Carl Daniel Platon
-- Gian Tuiza (Leader for Research Team)
-- Sophie Gonzales
+# fsh_lab_scheduler
+Prototype Development of Laboratory Scheduler Web-App in Fidelis Senior High | STEM 12 Gen-A (Group 2)
 
 ---
-  
+
 ## Overview
-- **Core idea:**  A web application that shows the availability of each item in the inventory of each laboratory in FSH and Faith Colleges that borrows items from oneanother.
-- **Users:** Management & faculty of FSH and Faith Colleges
+
+  The Laboratory Scheduler Web-App is a prototype system developed for Fidelis Senior High to streamline the management of school laboratories. It provides real-time room occupancy, digital reservation of lab rooms, and admin-controlled approval systems, all designed to reduce scheduling conflicts and improve efficiency for students, teachers, and school management.
 
 ---
 
-## Design
-**Figma**
-- **Pages:**
-	- **Login page**
-		- 2 types of accounts
-			- Admin
-			- User (Teachers)
-	- **Dashboard/Home Page**
-		- Laboratory room pages (#)
-			- Inventory of materials
-				- list of all materials
-				- quantity
-			- Availability of materials
-				- borrowed or not
-	- **Mail**
-		- notifications for
-			- approved/declined borrow request (user/teacher)
-			- requesting to borrow an item (admin)
-	- **Account**
-		- change password
-		- delete account
-	- **Settings**
-		- light mode/dark mode
-		  
----
+## Development Team
+**Prototype Development**
+  - Prince Jorick Fajutagana – UI/UX, Frontend, Backend
+  - Mark Miel Betonio – Frontend, Backend
+  - Will Jairuz Amado – Frontend, Backend
 
-## Programming
-**Tech stack:**
-- **Frontend** ([Cloudflare](https://developers.cloudflare.com/))
-	- HTML
-	- CSS
-	- JavaScript
-- **Backend** ([Render](https://dashboard.render.com/select-plan?plan=hobby))
-	- Python ([FastAPI](https://fastapi.tiangolo.com/))
-- **Database** ([Supabase](https://supabase.com/pricing)/PHP) 
+**Research Paper Team**
+  - Arianne Solano
+  - Eugene Christ Garcia
+  - Carl Daniel
+  - Gian Tuiza
+  - Sophie Gonzales
+
+  ---
+
+  ## **System Planning**
+### **Core Idea**
+A web application that:
+- Displays **live occupancy** of laboratory rooms
+- Manages and approves **teacher reservation requests**
+- Provides easy access for students, faculty, and management
     
+### **Users**
+- Admins
+- Teachers / Faculty
+- Students
+    
+
+### **Key Features**
+- Account password change
+- Push notifications
+- Real-time laboratory occupancy (Supabase Realtime)
+- Room reservation by teachers
+- Admin approval system for reservations
+- Reservation history (per semester or all-time)
+- Light mode / Dark mode
+- Hardware integration options: **camera / sensor / infrared device** for occupancy detection
+    
+---
+
+## **UI/UX Design**
+
+Designed using **Figma**.
+### **Pages**
+- Login Page
+- Account Types:
+    - **Admin**
+        - NFC/RFID Keycard Authentication
+    - **User (Teacher/Student)**
+- Admin Dashboard
+- User Home Page
+- Laboratory Room Pages (4 rooms)
+- Account Settings
+    
+---
+
+## **Programming & Tech Stack**
+### **Frontend** (Hosted on Vercel)
+- HTML
+- CSS
+- JavaScript
+- **Next.js**
+- **Tailwind CSS**
+
+### **Backend** (Hosted on Render)
+- **Python (FastAPI)**
+- API endpoints for authentication, reservations, admin actions, and real-time updates
+
+### **Database**
+- **Supabase**
+    - Authentication
+    - Table storage
+    - Realtime features (room occupancy + notifications)
+
+---
+
+## **Requirements**
+- VS Code
+- Git
+- GitHub CLI
+- Python
+- Node.js (for Next.js)
+- Supabase CLI (optional but recommended)
