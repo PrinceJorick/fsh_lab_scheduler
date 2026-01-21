@@ -30,7 +30,7 @@ nav {
     /* CHANGE THIS LINE */
     /* Old: padding: 2% 3%; */
     /* New: Fixed 30px top/bottom (stable height), Responsive 5% left/right (adjusts horizontally) */
-    padding:10px 3%; 
+    padding:30px 3%; 
 }
 
 nav img{
@@ -139,6 +139,53 @@ font-size: 0.9rem;
 
 /* login landing page */
 #login-view {
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+/* signup password step */
+#signup-password-view {
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+/* Password container for eye icon */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container .login-input {
+    width: 100%;
+    padding-right: 45px; /* Make room for the eye icon */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: -6px;
+    cursor: pointer;
+    color: #707475;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    user-select: none;
+    display: none; /* Hidden by default */
+}
+
+.password-toggle:hover {
+    color: #081316;
+}
+
+/* signup sect */
+#signup-view {
     display: none; 
     flex-direction: column;
     align-items: center;
@@ -271,7 +318,7 @@ font-size: 0.9rem;
     min-height: 100vh;
     background-color: #ffffff;
     /* This padding prevents your content from hiding under the fixed header */
-    padding-top: 80px; 
+    padding-top: 100px; 
 }
 
 .dash-nav {
@@ -286,7 +333,7 @@ font-size: 0.9rem;
     /* Flexbox settings for the logo */
     display: flex;
     align-items: center; 
-    padding: 35px 5%; /* Using px for more consistent height control */
+    padding: 60px 5%; /* Using px for more consistent height control */
     
     /* Adds the "strip" look with a subtle shadow */
     box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
@@ -296,6 +343,11 @@ font-size: 0.9rem;
     width: 50px;
     height: 50px;
     object-fit: contain;
+}
+
+#user-display {
+    font-size: 18px; /* or 18px for even bigger */
+    font-weight: 500; /* Makes it slightly bolder */
 }
 
 /* Streamlined Main Content (merged your two .main-content blocks) */
@@ -335,9 +387,9 @@ font-size: 0.9rem;
 
 .lab-image {
     height: 200px;
+    width: 100%; /* ADD THIS */
     background-color: #e8e8e8;
     display: block;
-    width: 100%;
     object-fit: cover;
 }
 

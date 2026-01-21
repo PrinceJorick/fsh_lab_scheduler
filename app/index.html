@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
         <title>FSH Lab Scheduler</title>
         <meta charset="utf-8">
@@ -13,47 +13,111 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
     </head>
     <body>
-        <section class="header" id="Home">
-            <nav>
-                <a href="index.html"><img src="../public/fsh_logo_black.png"></a>
-            </nav>
+        <nav>
+            <img src="../public/fsh_logo_black.png">
+        </nav>
+
         <div class="main-container">
-            <!-- this is for the left side content -->
+            <!-- left sect -->
             <div class="content">
                 <h1>Fidelis Senior High</h1>
                 <h2>Laboratory Scheduler</h2>
+
+                <!-- initial sect -->
                 <div id="selection-view">
-                    <p>Choose your occupancy</p>
+                    <p>Choose occupancy</p>
                     <div class="toggle">
-                        <button class="active" onclick="handleSelection(this)">Admin</button>
-                        <button onclick="handleSelection(this)">User</button>
+                        <button onclick="handleSelection(this)">Student</button>
+                        <button onclick="handleSelection(this)">Teacher</button>
                     </div>
                 </div>
 
-                <div id="login-view" style="display: none;">
-                    <p class="login-subtext">Sign in with your school email</p>
+                <!-- login sect -->
+                <div id="login-view">
+                    <h2 class="login-subtext">Sign in to continue</h2>
 
-                    <div id="buttonDiv" style="margin-top: 5px; width: 100%;"></div>
+                    <div id="buttonDiv-login"></div>
 
                     <div class="divider">or</div>
 
-                    <input type="email" placeholder="studentid@firstasia.edu.ph" class="login-input">
-                    <button class="enter-btn">Enter</button>
+                    <input type="email" id="login-email" class="login-input" placeholder="Email">
+                    <div class="password-container">
+                        <input type="password" id="login-password" class="login-input" placeholder="Password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('login-password', this)"></i>
+                    </div>
+
+                    <button class="enter-btn">Continue</button>
+
+                    <p style="font-size: 14px; color: #707475;">
+                        Don't have an account? 
+                        <a href="#" onclick="showSignup(); return false;" style="color: #081316; font-weight: 500; text-decoration: none;">Sign up</a>
+                    </p>
 
                     <div class="back-navigation">
                         <button class="back-btn" onclick="goBack()">
-                            <i class="fa-solid fa-chevron-left"></i> </button>
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- signup sect - Step 1: Email -->
+                <div id="signup-view">
+                    <h2 class="login-subtext">Create your account</h2>
+
+                    <div id="buttonDiv-signup"></div>
+
+                    <div class="divider">or</div>
+
+                    <input type="email" id="signup-email" class="login-input" placeholder="Enter your email">
+
+                    <button class="enter-btn" onclick="confirmEmail()">Continue</button>
+
+                    <p style="font-size: 14px; color: #707475;">
+                        Already have an account? 
+                        <a href="#" onclick="showLoginFromSignup(); return false;" style="color: #081316; font-weight: 500; text-decoration: none;">Sign in</a>
+                    </p>
+
+                    <div class="back-navigation">
+                        <button class="back-btn" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- signup sect - Step 2: Password -->
+                <div id="signup-password-view">
+                    <h2 class="login-subtext">Create a password</h2>
+                    <p style="font-size: 14px; color: #707475; margin-bottom: 20px;" id="signup-email-display"></p>
+
+                    <div class="password-container">
+                        <input type="password" id="signup-password" class="login-input" placeholder="Create password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('signup-password', this)"></i>
+                    </div>
+
+                    <div class="password-container">
+                        <input type="password" id="signup-confirm-password" class="login-input" placeholder="Confirm password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('signup-confirm-password', this)"></i>
+                    </div>
+
+                    <button class="enter-btn" onclick="handleSignup()">Create Account</button>
+
+                    <div class="back-navigation">
+                        <button class="back-btn" onclick="backToEmailStep()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <!-- right side content -->
+
+            <!-- right sect -->
             <div class="image-container">
-                <img src="../public/nsc_bldg.png" alt="NSC Building">
+                <img src="../public/nsc_bldg.png">
             </div>
         </div>
-        </section>
+        
+        <script src="script.js"></script>
     </body>
-
-    <!-- jscript -->
-    <script src="script.js"></script>  
 </html>
