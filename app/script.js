@@ -255,10 +255,10 @@ const UIManager = {
         
         if (input.type === 'password') {
             input.type = 'text';
-            iconElement.classList.replace('fa-eye', 'fa-eye-slash');
+            iconElement.classList.replace('fa-eye', 'fa-eye-slash'); // Keeps fa-regular
         } else {
             input.type = 'password';
-            iconElement.classList.replace('fa-eye-slash', 'fa-eye');
+            iconElement.classList.replace('fa-eye-slash', 'fa-eye'); // Keeps fa-regular
         }
     },
 
