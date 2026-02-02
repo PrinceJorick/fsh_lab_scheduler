@@ -18,12 +18,10 @@
         </nav>
 
         <div class="main-container">
-            <!-- left sect -->
             <div class="content">
                 <h1>Fidelis Senior High</h1>
                 <h2>Laboratory Scheduler</h2>
 
-                <!-- initial sect -->
                 <div id="selection-view">
                     <p>Choose occupancy</p>
                     <div class="toggle">
@@ -32,7 +30,6 @@
                     </div>
                 </div>
 
-                <!-- login sect -->
                 <div id="login-view">
                     <h2 class="login-subtext">Sign in to continue</h2>
 
@@ -43,7 +40,7 @@
                     <input type="email" id="login-email" class="login-input" placeholder="Email">
                     <div class="password-container">
                         <input type="password" id="login-password" class="login-input" placeholder="Password">
-                        <i class="fas fa-eye password-toggle" onclick="togglePassword('login-password', this)"></i>
+                        <i class="far fa-eye password-toggle" onclick="togglePassword('login-password', this)"></i>
                     </div>
 
                     <button class="enter-btn">Continue</button>
@@ -61,7 +58,6 @@
                     </div>
                 </div>
 
-                <!-- signup sect - Step 1: Email -->
                 <div id="signup-view">
                     <h2 class="login-subtext">Create your account</h2>
 
@@ -86,19 +82,18 @@
                     </div>
                 </div>
 
-                <!-- signup sect - Step 2: Password -->
                 <div id="signup-password-view">
                     <h2 class="login-subtext">Create a password</h2>
                     <p style="font-size: 14px; color: #707475; margin-bottom: 20px;" id="signup-email-display"></p>
 
                     <div class="password-container">
                         <input type="password" id="signup-password" class="login-input" placeholder="Create password">
-                        <i class="fas fa-eye password-toggle" onclick="togglePassword('signup-password', this)"></i>
+                        <i class="far fa-eye password-toggle" onclick="togglePassword('signup-password', this)"></i>
                     </div>
 
                     <div class="password-container">
                         <input type="password" id="signup-confirm-password" class="login-input" placeholder="Confirm password">
-                        <i class="fas fa-eye password-toggle" onclick="togglePassword('signup-confirm-password', this)"></i>
+                        <i class="far fa-eye password-toggle" onclick="togglePassword('signup-confirm-password', this)"></i>
                     </div>
 
                     <button class="enter-btn" onclick="handleSignup()">Create Account</button>
@@ -112,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- right sect -->
             <div class="image-container">
                 <img src="../public/nsc_bldg.png">
             </div>
