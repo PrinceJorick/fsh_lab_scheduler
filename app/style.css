@@ -1,29 +1,22 @@
-/* app/style.css */
-
-:root {
-    --primary-dark: #081316;
-    --primary-light: #ffffff;
-    --text-muted: #707475;
-    --accent-error: #ff4d4d; /* FSH Red */
-    --accent-bg-error: #fff0f0;
-    --transition-speed: 0.3s;
-    --font-main: "IBM Plex Sans", sans-serif;
-    --border-radius-pill: 50px;
-    --border-radius-card: 30px;
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+    display: none;
 }
 
-/* Scrollbar Hiding */
-::-webkit-scrollbar { display: none; }
-html, body { -ms-overflow-style: none; scrollbar-width: none; }
+/* Hide scrollbar for Firefox, IE and Edge */
+html, body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
 
-* {
+*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--font-main);
+    font-family: "IBM Plex Sans", sans-serif;
 }
 
-/* --- Navigation --- */
+/* nav bar */ 
 nav {
     position: absolute;
     top: 0;
@@ -31,22 +24,31 @@ nav {
     width: 100%;
     z-index: 10;
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* adds space between logo and text */
     display: flex;
-    padding: 30px 3%;
+    
+    /* CHANGE THIS LINE */
+    /* Old: padding: 2% 3%; */
+    /* New: Fixed 30px top/bottom (stable height), Responsive 5% left/right (adjusts horizontally) */
+    padding:30px 3%; 
 }
 
-nav img { width: 50px; height: 50px; }
+nav img{
+    width: 50px;
+    height: 50px;
+}
 
-/* --- Layout --- */
+/* main wrapper for split screen container */
 .main-container {
-    display: flex;
-    flex-direction: row;
+    display: flex; 
+    flex-direction: row; 
     width: 100%;
     height: 100vh;
     align-items: center;
 }
 
+/* left sect */
+/* Add padding to the main text container so it doesn't hit the screen edges */
 .content {
     flex: 1;
     width: 100%;
@@ -55,41 +57,56 @@ nav img { width: 50px; height: 50px; }
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 60px;
+    padding: 0 60px; /* NEW: Adds cushion on left/right sides */
 }
 
+/* Give the main title space below it */
+.content h1 {
+    font-size: 2.5rem; /* You can increase to 3rem for impact if desired */
+    margin-bottom: 15px; /* CHANGED: Was 1px. Now gives breathing room. */
+    line-height: 1.2;    /* NEW: Prevents letters from overlapping on multiple lines */
+}
+
+/* Push the buttons further down from the subtitle */
+.content h2 {
+    color: #707475;
+    font-weight: 400;
+    margin-bottom: 40px; /* CHANGED: Was 20px. Pushes the toggle button group away. */
+}
+
+.content p{
+font-size: 0.9rem;
+    color: #707475;
+    margin-bottom: 10px;
+}
+
+/* Adjust the specific section holding the toggle buttons */
+#selection-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 20px; /* NEW: Adds space between the "Choose occupancy" text and buttons */
+}
+
+/* right sect */
 .image-container {
-    flex: 1;
+    flex: 1; 
     height: 100vh;
-    padding: 40px;
+    padding: 40px; 
 }
 
 .image-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    border-radius: var(--border-radius-card);
+    object-fit: cover; 
+    border-radius: 30px; 
 }
 
-/* --- Typography --- */
-.content h1 { font-size: 2.5rem; margin-bottom: 15px; line-height: 1.2; }
-.content h2 { color: var(--text-muted); font-weight: 400; margin-bottom: 40px; }
-.content p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; }
-.login-subtext {
-    text-align: center;
-    line-height: 1.2;
-    font-size: 1.1rem;
-    font-weight: 400;
-    margin-bottom: 10px;
-    margin-top: -5px;
-    color: var(--text-muted);
-}
-
-/* --- Components --- */
-/* Toggles */
+/* toggle button */
 .toggle {
     display: inline-flex;
-    background: #9999991a; /* slight transparency */
+    background: #9999; 
     border-radius: 30px;
     padding: 5px;
     margin-top: 10px;
@@ -105,23 +122,174 @@ nav img { width: 50px; height: 50px; }
     border: none;
     cursor: pointer;
     border-radius: 25px;
-    color: var(--text-muted);
-    transition: all var(--transition-speed) ease;
+    color: #707475;
+    transition: all 0.3s ease; 
 }
 
-.toggle button:hover, .toggle button.active {
-    background-color: var(--primary-dark);
-    color: var(--primary-light);
+.toggle button:hover {
+    background-color: #081316;
+    color: #fff;
     font-weight: 300;
     transform: translateY(-1px);
 }
 
-/* Inputs & Buttons */
+.toggle button:active {
+    transform: scale(0.98);
+}
+
+/* login landing page */
+#login-view {
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+/* signup password step */
+#signup-password-view {
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+/* Password container for eye icon */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-container .login-input {
+    width: 100%;
+    padding-right: 45px; /* Make room for the eye icon */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: -6px;
+    cursor: pointer;
+    color: #707475;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    user-select: none;
+    display: none; /* Hidden by default */
+}
+
+.password-toggle:hover {
+    color: #081316;
+}
+
+/* signup sect */
+#signup-view {
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+.back-navigation {
+    margin-top: 25px; 
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+}
+
+.back-btn {
+    background: #081316;
+    border: 1px solid transparent; 
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 50px; 
+    color: #ffffff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #081316;
+    background-color: #ffffff;
+    border: 1px solid #081316;
+    transform: translateY(-1px);
+}
+
+.login-subtext {
+    text-align: center; 
+    line-height: 1.2;    /* Reduced line-height for a tighter text block */
+    font-size: 1.1rem;   
+    font-weight: 400;
+    
+    /* Spacing adjustments */
+    margin-bottom: 10px; /* Reduced from 20px to tighten the space below */
+    margin-top: -5px;   /* Pulls the text up to reduce the large gap from the title above */
+    
+    color: #707475;
+ }
+
+ /* goog btn */
+.google-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background-color: #081316;
+    color: #FFFFFF;
+    border: 1px solid transparent; 
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+}
+
+.google-btn:hover {
+    background-color: #ffffff;
+    color: #081316;
+    border: 1px solid #081316; 
+    transform: translateY(-1px);
+}
+
+.google-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+/* divider */
+.divider {
+    margin: 10px 0;
+    color: #707475; 
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #707475 ;
+    margin: 0 10px;
+}
+
+/* login */
 .login-input {
     width: 100%;
     padding: 12px 20px;
-    border: 1px solid var(--primary-dark);
-    border-radius: var(--border-radius-pill);
+    border: 1px solid #081316;
+    border-radius: 50px;
     margin-bottom: 12px;
     outline: none;
 }
@@ -130,156 +298,204 @@ nav img { width: 50px; height: 50px; }
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
-    background: var(--primary-dark);
-    color: var(--primary-light);
-    border: 1px solid transparent;
-    border-radius: var(--border-radius-pill);
+    background: #081316;
+    color: #ffffff;
+    border: 1px solid transparent; 
+    border-radius: 50px;
     cursor: pointer;
-    transition: all var(--transition-speed) ease;
+    transition: all 0.3s ease;
 }
 
 .enter-btn:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
-    border: 1px solid var(--primary-dark);
+    background-color: #ffffff;
+    color: #081316;
+    border: 1px solid #081316; 
     transform: translateY(-1px);
 }
 
-.back-btn {
-    background: var(--primary-dark);
-    border: 1px solid transparent;
-    cursor: pointer;
-    padding: 10px 20px;
-    border-radius: var(--border-radius-pill);
-    color: var(--primary-light);
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all var(--transition-speed) ease;
-}
-
-.back-btn:hover {
-    color: var(--primary-dark);
-    background-color: var(--primary-light);
-    border: 1px solid var(--primary-dark);
-    transform: translateY(-1px);
-}
-
-.forgot-password-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end; /* Aligns link to the right */
-    margin-bottom: 20px;       /* Spacing before the Continue button */
-    margin-top: -5px;          /* Pulls it slightly closer to the password field */
-}
-
-#forgot-password-link {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-weight: 400;
-    transition: color var(--transition-speed) ease;
-}
-
-#forgot-password-link:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-}
-
-/* Form Sections */
-#selection-view { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px; }
-#login-view, #signup-view, #signup-password-view {
-    display: none; /* Managed by JS */
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 320px;
-}
-
-.back-navigation { margin-top: 25px; width: 100%; display: flex; justify-content: center; }
-.divider { margin: 10px 0; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; width: 100%; }
-.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--text-muted); margin: 0 10px; }
-
-/* Password Field */
-.password-container { position: relative; width: 100%; }
-.password-container .login-input { padding-right: 45px; }
-.password-toggle {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-top: -6px;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 16px;
-    transition: color var(--transition-speed) ease;
-    user-select: none;
-    display: none;
-}
-.password-toggle:hover { color: var(--primary-dark); }
-
-/* Validation States */
 .input-error {
-    border: 2px solid var(--accent-error) !important;
-    background-color: var(--accent-bg-error);
+    border: 2px solid #ff4d4d !important; /* FSH Red */
+    background-color: #fff0f0;
     animation: shake 0.4s ease-in-out;
 }
 
-/* --- Scheduler / Dashboard --- */
-.dashboard-container { width: 100%; min-height: 100vh; background-color: var(--primary-light); padding-top: 100px; }
-.dash-nav {
-    background-color: var(--primary-light);
-    position: fixed;
-    top: 0; left: 0; width: 100%;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    padding: 60px 5%;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+/* ----------------------- SCHEDULER THING ---------------------------------------- */
+
+.dashboard-container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #ffffff;
+    /* This padding prevents your content from hiding under the fixed header */
+    padding-top: 100px; 
 }
-.dash-nav img { object-fit: contain; }
-#user-display { font-size: 18px; font-weight: 500; }
 
-.main-content { max-width: 1400px; margin: 0 auto; padding: 40px 5%; }
-.main-content h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 30px; color: var(--primary-dark); }
+.dash-nav {
+    background-color: #ffffff; 
+    /* Changed to fixed to ensure it stays at the very top of the viewport */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    
+    /* Flexbox settings for the logo */
+    display: flex;
+    align-items: center; 
+    padding: 60px 5%; /* Using px for more consistent height control */
+    
+    /* Adds the "strip" look with a subtle shadow */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+}
 
+.dash-nav img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+#user-display {
+    font-size: 18px; /* or 18px for even bigger */
+    font-weight: 500; /* Makes it slightly bolder */
+}
+
+/* Streamlined Main Content (merged your two .main-content blocks) */
+.main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 5%;
+}
+
+.main-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #081316;
+}
+
+/* Grid for the lab cards - added responsiveness */
 .lab-grid {
     display: grid;
+    /* repeat(auto-fit...) makes it responsive automatically! */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
 }
 
 .lab-card {
-    border-radius: var(--border-radius-card);
+    border-radius: 30px;
     overflow: hidden;
     cursor: pointer;
-    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     background: #f9f9f9;
 }
-.lab-card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-.lab-image { height: 200px; width: 100%; background-color: #e8e8e8; display: block; object-fit: cover; }
-.lab-info { padding: 25px; }
-.lab-info span { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
-.lab-info h3 { font-size: 1.25rem; margin-top: 8px; color: var(--primary-dark); }
 
-/* --- Animations --- */
-.fade-in { animation: fadeIn 0.8s ease-in-out forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.lab-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
 
-/* --- Responsive --- */
-@media screen and (max-width: 768px) {
-    .main-container { flex-direction: column-reverse; height: auto; min-height: 100vh; }
-    .image-container { height: 30vh; padding: 0; width: 100%; }
-    .image-container img { border-radius: 0 0 var(--border-radius-card) var(--border-radius-card); }
-    .content { padding: 40px 20px; justify-content: flex-start; }
-    .lab-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    nav {
-        position: absolute; width: 100%; padding: 20px;
-        background: linear-gradient(to bottom, #ffffff 65%, rgba(255, 255, 255, 0) 100%);
-        padding-bottom: 60px;
+.lab-image {
+    height: 200px;
+    width: 100%; /* ADD THIS */
+    background-color: #e8e8e8;
+    display: block;
+    object-fit: cover;
+}
+
+.lab-info {
+    padding: 25px;
+}
+
+.lab-info span {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #707475;
+}
+
+.lab-info h3 {
+    font-size: 1.25rem;
+    margin-top: 8px;
+    color: #081316;
+}
+
+/* animations */
+.fade-in {
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px); /* slides up 10px below */
     }
-    .dash-nav { padding: 15px 5%; }
-    .content h1, .main-content h1 { font-size: 2rem; }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* --- RESPONSIVE DESIGN (Add to bottom of style.css) --- */
+
+@media screen and (max-width: 768px) {
+    /* 1. Fix the Login Page (index.html) */
+    .main-container {
+        flex-direction: column-reverse; /* Puts login form on top, image on bottom */
+        height: auto; /* Allow scrolling on mobile */
+        min-height: 100vh;
+    }
+
+    .image-container {
+        height: 30vh; /* Make image header-sized on mobile */
+        padding: 0;
+        width: 100%;
+    }
+
+    .image-container img {
+        border-radius: 0 0 30px 30px; /* Round only bottom corners */
+    }
+
+    .content {
+        padding: 40px 20px;
+        justify-content: flex-start; /* Aligns content to top */
+    }
+
+    /* 2. Fix the Dashboard Grid (dashboard.html) */
+    .lab-grid {
+        /* Reduce min-width so cards fit on small phones (e.g. iPhone SE) */
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: 20px;
+    }
+
+    /* 3. Adjust Navigation */
+    nav {
+        /* Change relative to absolute so it overlays the image */
+        position: absolute; 
+        width: 100%;
+        padding: 20px;
+        
+        /* The Fade Effect: Solid white at the top, fading to transparent */
+        background: linear-gradient(to bottom, #ffffff 65%, rgba(255, 255, 255, 0) 100%);
+        
+        /* Adds extra space at the bottom for a longer, smoother fade */
+        padding-bottom: 60px; 
+    }
+
+    .dash-nav {
+        padding: 15px 5%; /* Smaller padding for mobile header */
+    }
+
+    .dashboard-container {
+        padding-top: 100px; /* Ensure content doesn't hide behind fixed nav */
+    }
+
+    /* 4. Typography Adjustments */
+    .content h1, .main-content h1 {
+        font-size: 2rem; /* Smaller headings for mobile */
+    }
 }
