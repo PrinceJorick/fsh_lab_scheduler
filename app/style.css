@@ -86,7 +86,7 @@ font-size: 0.9rem;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    gap: 15px; /* NEW: Adds space between the "Choose occupancy" text and buttons */
+    gap: 20px; /* NEW: Adds space between the "Choose occupancy" text and buttons */
 }
 
 /* right sect */
@@ -223,7 +223,15 @@ font-size: 0.9rem;
 
 .login-subtext {
     text-align: center; 
-    line-height: 1.4;
+    line-height: 1.2;    /* Reduced line-height for a tighter text block */
+    font-size: 1.1rem;   
+    font-weight: 400;
+    
+    /* Spacing adjustments */
+    margin-bottom: 10px; /* Reduced from 20px to tighten the space below */
+    margin-top: -5px;   /* Pulls the text up to reduce the large gap from the title above */
+    
+    color: #707475;
  }
 
  /* goog btn */
