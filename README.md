@@ -7,8 +7,9 @@ A web-based application designed to streamline the management of laboratory reso
 The core mission of this application is to solve scheduling conflicts by providing a platform that visualizes **live occupancy** of laboratory rooms and handles **reservations** efficiently.
 
 **Target Users:**
-* Admin
+* Management
 * Faculty
+* Students
 
 ---
 
@@ -19,7 +20,7 @@ The application offers two distinct user experiences:
 ### 👤 User Features (Teachers/Students)
 * **Live Dashboard:** View real-time availability of 4 different laboratory rooms.
 * **Reservation System:** Submit reservation requests easily.
-* **History Log:** View past reservations.
+* **History Log:** View past reservations (filtered by semester or all-time).
 * **Notifications:** Receive status updates on requests.
 * **Account Management:** Secure login and password settings.
 
@@ -66,3 +67,11 @@ The application offers two distinct user experiences:
 * Carl Daniel Platon
 * Gian Tuiza
 * Sophie Gonzales
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
