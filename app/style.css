@@ -16,7 +16,10 @@ html, body {
     font-family: "IBM Plex Sans", sans-serif;
 }
 
-/* nav bar */ 
+/* ============================================================================
+   NAVIGATION BAR
+   ============================================================================ */
+
 nav {
     position: absolute;
     top: 0;
@@ -24,13 +27,9 @@ nav {
     width: 100%;
     z-index: 10;
     align-items: center;
-    gap: 10px; /* adds space between logo and text */
+    gap: 10px;
     display: flex;
-    
-    /* CHANGE THIS LINE */
-    /* Old: padding: 2% 3%; */
-    /* New: Fixed 30px top/bottom (stable height), Responsive 5% left/right (adjusts horizontally) */
-    padding:30px 3%; 
+    padding: 30px 3%;
 }
 
 nav img{
@@ -38,7 +37,10 @@ nav img{
     height: 50px;
 }
 
-/* main wrapper for split screen container */
+/* ============================================================================
+   MAIN CONTAINER - SPLIT SCREEN LAYOUT
+   ============================================================================ */
+
 .main-container {
     display: flex; 
     flex-direction: row; 
@@ -47,8 +49,10 @@ nav img{
     align-items: center;
 }
 
-/* left sect */
-/* Add padding to the main text container so it doesn't hit the screen edges */
+/* ============================================================================
+   LEFT SECTION - CONTENT AREA
+   ============================================================================ */
+
 .content {
     flex: 1;
     width: 100%;
@@ -57,39 +61,31 @@ nav img{
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 60px; /* NEW: Adds cushion on left/right sides */
+    padding: 0 60px;
 }
 
-/* Give the main title space below it */
 .content h1 {
-    font-size: 2.5rem; /* You can increase to 3rem for impact if desired */
-    margin-bottom: 15px; /* CHANGED: Was 1px. Now gives breathing room. */
-    line-height: 1.2;    /* NEW: Prevents letters from overlapping on multiple lines */
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    line-height: 1.2;
 }
 
-/* Push the buttons further down from the subtitle */
 .content h2 {
     color: #707475;
     font-weight: 400;
-    margin-bottom: 40px; /* CHANGED: Was 20px. Pushes the toggle button group away. */
+    margin-bottom: 40px;
 }
 
 .content p{
-font-size: 0.9rem;
+    font-size: 0.9rem;
     color: #707475;
     margin-bottom: 10px;
 }
 
-/* Adjust the specific section holding the toggle buttons */
-#selection-view {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 20px; /* NEW: Adds space between the "Choose occupancy" text and buttons */
-}
+/* ============================================================================
+   RIGHT SECTION - IMAGE CONTAINER
+   ============================================================================ */
 
-/* right sect */
 .image-container {
     flex: 1; 
     height: 100vh;
@@ -103,7 +99,22 @@ font-size: 0.9rem;
     border-radius: 30px; 
 }
 
-/* toggle button */
+/* ============================================================================
+   ROLE SELECTION VIEW
+   ============================================================================ */
+
+#selection-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+}
+
+/* ============================================================================
+   TOGGLE BUTTONS
+   ============================================================================ */
+
 .toggle {
     display: inline-flex;
     background: #9999; 
@@ -137,8 +148,16 @@ font-size: 0.9rem;
     transform: scale(0.98);
 }
 
-/* login landing page */
-#login-view {
+/* ============================================================================
+   VIEW CONTAINERS
+   ============================================================================ */
+
+#login-view,
+#signup-view,
+#signup-password-view,
+#forgot-password-view,
+#otp-view,
+#reset-password-view {
     display: none; 
     flex-direction: column;
     align-items: center;
@@ -146,16 +165,10 @@ font-size: 0.9rem;
     max-width: 320px;
 }
 
-/* signup password step */
-#signup-password-view {
-    display: none; 
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 320px;
-}
+/* ============================================================================
+   PASSWORD FIELD WITH TOGGLE ICON
+   ============================================================================ */
 
-/* Password container for eye icon */
 .password-container {
     position: relative;
     width: 100%;
@@ -163,7 +176,7 @@ font-size: 0.9rem;
 
 .password-container .login-input {
     width: 100%;
-    padding-right: 45px; /* Make room for the eye icon */
+    padding-right: 45px;
 }
 
 .password-toggle {
@@ -177,64 +190,50 @@ font-size: 0.9rem;
     font-size: 16px;
     transition: color 0.3s ease;
     user-select: none;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
 .password-toggle:hover {
     color: #081316;
 }
 
-/* signup sect */
-#signup-view {
-    display: none; 
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 320px;
-}
+/* ============================================================================
+   FORGOT PASSWORD LINK
+   ============================================================================ */
 
-.back-navigation {
-    margin-top: 25px; 
-    width: 100%;
-    display: flex;
-    justify-content: center; 
-}
-
-.back-btn {
-    background: #081316;
-    border: 1px solid transparent; 
-    cursor: pointer;
-    padding: 10px 20px;
-    border-radius: 50px; 
-    color: #ffffff;
+.forgot-password-link {
+    align-self: flex-end;
     font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    color: #081316;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 15px;
+    margin-top: -5px;
+    transition: color 0.3s ease;
 }
 
-.back-btn:hover {
-    color: #081316;
-    background-color: #ffffff;
-    border: 1px solid #081316;
-    transform: translateY(-1px);
+.forgot-password-link:hover {
+    color: #707475;
 }
+
+/* ============================================================================
+   HEADINGS AND TEXT
+   ============================================================================ */
 
 .login-subtext {
     text-align: center; 
-    line-height: 1.2;    /* Reduced line-height for a tighter text block */
+    line-height: 1.2;
     font-size: 1.1rem;   
     font-weight: 400;
-    
-    /* Spacing adjustments */
-    margin-bottom: 10px; /* Reduced from 20px to tighten the space below */
-    margin-top: -5px;   /* Pulls the text up to reduce the large gap from the title above */
-    
+    margin-bottom: 10px;
+    margin-top: -5px;
     color: #707475;
- }
+}
 
- /* goog btn */
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
 .google-btn {
     width: 100%;
     padding: 12px 24px;
@@ -266,34 +265,6 @@ font-size: 0.9rem;
     object-fit: contain;
 }
 
-/* divider */
-.divider {
-    margin: 10px 0;
-    color: #707475; 
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.divider::before, .divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: #707475 ;
-    margin: 0 10px;
-}
-
-/* login */
-.login-input {
-    width: 100%;
-    padding: 12px 20px;
-    border: 1px solid #081316;
-    border-radius: 50px;
-    margin-bottom: 12px;
-    outline: none;
-}
-
 .enter-btn {
     width: 100%;
     padding: 12px;
@@ -313,37 +284,103 @@ font-size: 0.9rem;
     transform: translateY(-1px);
 }
 
+.back-btn {
+    background: #081316;
+    border: 1px solid transparent; 
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 50px; 
+    color: #ffffff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #081316;
+    background-color: #ffffff;
+    border: 1px solid #081316;
+    transform: translateY(-1px);
+}
+
+/* ============================================================================
+   BACK NAVIGATION
+   ============================================================================ */
+
+.back-navigation {
+    margin-top: 25px; 
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+}
+
+/* ============================================================================
+   DIVIDER
+   ============================================================================ */
+
+.divider {
+    margin: 10px 0;
+    color: #707475; 
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #707475;
+    margin: 0 10px;
+}
+
+/* ============================================================================
+   INPUT FIELDS
+   ============================================================================ */
+
+.login-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #081316;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    outline: none;
+}
+
 .input-error {
-    border: 2px solid #ff4d4d !important; /* FSH Red */
+    border: 2px solid #ff4d4d !important;
     background-color: #fff0f0;
     animation: shake 0.4s ease-in-out;
 }
 
-/* ----------------------- SCHEDULER THING ---------------------------------------- */
+/* ============================================================================
+   DASHBOARD CONTAINER
+   ============================================================================ */
 
 .dashboard-container {
     width: 100%;
     min-height: 100vh;
     background-color: #ffffff;
-    /* This padding prevents your content from hiding under the fixed header */
-    padding-top: 100px; 
+    padding-top: 100px;
 }
+
+/* ============================================================================
+   DASHBOARD NAVIGATION
+   ============================================================================ */
 
 .dash-nav {
     background-color: #ffffff; 
-    /* Changed to fixed to ensure it stays at the very top of the viewport */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
-    
-    /* Flexbox settings for the logo */
     display: flex;
     align-items: center; 
-    padding: 60px 5%; /* Using px for more consistent height control */
-    
-    /* Adds the "strip" look with a subtle shadow */
+    padding: 60px 5%;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
 }
 
@@ -354,11 +391,14 @@ font-size: 0.9rem;
 }
 
 #user-display {
-    font-size: 18px; /* or 18px for even bigger */
-    font-weight: 500; /* Makes it slightly bolder */
+    font-size: 18px;
+    font-weight: 500;
 }
 
-/* Streamlined Main Content (merged your two .main-content blocks) */
+/* ============================================================================
+   MAIN CONTENT AREA
+   ============================================================================ */
+
 .main-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -372,10 +412,12 @@ font-size: 0.9rem;
     color: #081316;
 }
 
-/* Grid for the lab cards - added responsiveness */
+/* ============================================================================
+   LAB GRID
+   ============================================================================ */
+
 .lab-grid {
     display: grid;
-    /* repeat(auto-fit...) makes it responsive automatically! */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
 }
@@ -395,7 +437,7 @@ font-size: 0.9rem;
 
 .lab-image {
     height: 200px;
-    width: 100%; /* ADD THIS */
+    width: 100%;
     background-color: #e8e8e8;
     display: block;
     object-fit: cover;
@@ -418,7 +460,10 @@ font-size: 0.9rem;
     color: #081316;
 }
 
-/* animations */
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
 .fade-in {
     animation: fadeIn 0.8s ease-in-out forwards;
 }
@@ -426,7 +471,7 @@ font-size: 0.9rem;
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px); /* slides up 10px below */
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -440,62 +485,54 @@ font-size: 0.9rem;
     75% { transform: translateX(5px); }
 }
 
-/* --- RESPONSIVE DESIGN (Add to bottom of style.css) --- */
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
 
 @media screen and (max-width: 768px) {
-    /* 1. Fix the Login Page (index.html) */
     .main-container {
-        flex-direction: column-reverse; /* Puts login form on top, image on bottom */
-        height: auto; /* Allow scrolling on mobile */
+        flex-direction: column-reverse;
+        height: auto;
         min-height: 100vh;
     }
 
     .image-container {
-        height: 30vh; /* Make image header-sized on mobile */
+        height: 30vh;
         padding: 0;
         width: 100%;
     }
 
     .image-container img {
-        border-radius: 0 0 30px 30px; /* Round only bottom corners */
+        border-radius: 0 0 30px 30px;
     }
 
     .content {
         padding: 40px 20px;
-        justify-content: flex-start; /* Aligns content to top */
+        justify-content: flex-start;
     }
 
-    /* 2. Fix the Dashboard Grid (dashboard.html) */
     .lab-grid {
-        /* Reduce min-width so cards fit on small phones (e.g. iPhone SE) */
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
         gap: 20px;
     }
 
-    /* 3. Adjust Navigation */
     nav {
-        /* Change relative to absolute so it overlays the image */
         position: absolute; 
         width: 100%;
         padding: 20px;
-        
-        /* The Fade Effect: Solid white at the top, fading to transparent */
         background: linear-gradient(to bottom, #ffffff 65%, rgba(255, 255, 255, 0) 100%);
-        
-        /* Adds extra space at the bottom for a longer, smoother fade */
         padding-bottom: 60px; 
     }
 
     .dash-nav {
-        padding: 15px 5%; /* Smaller padding for mobile header */
+        padding: 15px 5%;
     }
 
     .dashboard-container {
-        padding-top: 100px; /* Ensure content doesn't hide behind fixed nav */
+        padding-top: 100px;
     }
 
-    /* 4. Typography Adjustments */
     .content h1, .main-content h1 {
-        font-size: 2rem; /* Smaller headings for mobile */
+        font-size: 2rem;
     }
 }
