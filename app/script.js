@@ -13,9 +13,9 @@ function handleSelection(clickedBtn) {
     if (!selectionView || !loginView) return; // safety check
 
     selectedRole = clickedBtn.innerText;
-    emailInput.placeholder = selectedRole === "Teacher" 
-        ? "teachername@firstasia.edu.ph" 
-        : "studentid@firstasia.edu.ph";
+    
+    // UPDATED: Same placeholder for both Teacher and Student
+    emailInput.placeholder = "usernameid@firstasia.edu.ph"; 
 
     // Clear login password and hide icon
     if (loginPasswordInput) {
@@ -134,12 +134,10 @@ function showSignup() {
         updatePasswordIconVisibility('login-password');
     }
     
-    // Update placeholder based on selected role
+    // UPDATED: Same placeholder for both roles
     const signupEmailInput = document.getElementById('signup-email');
     if (signupEmailInput) {
-        signupEmailInput.placeholder = selectedRole === "Teacher" 
-            ? "teachername@firstasia.edu.ph" 
-            : "studentid@firstasia.edu.ph";
+        signupEmailInput.placeholder = "usernameid@firstasia.edu.ph";
     }
     
     loginView.style.display = 'none';
