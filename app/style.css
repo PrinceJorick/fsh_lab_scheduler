@@ -166,6 +166,27 @@ nav img { width: 50px; height: 50px; }
     transform: translateY(-1px);
 }
 
+.forgot-password-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* Aligns link to the right */
+    margin-bottom: 20px;       /* Spacing before the Continue button */
+    margin-top: -5px;          /* Pulls it slightly closer to the password field */
+}
+
+#forgot-password-link {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 400;
+    transition: color var(--transition-speed) ease;
+}
+
+#forgot-password-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 /* Form Sections */
 #selection-view { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 20px; }
 #login-view, #signup-view, #signup-password-view {

@@ -112,6 +112,16 @@ const UIManager = {
             });
         });
 
+        // Forgot Password Handler
+        const forgotLink = document.getElementById('forgot-password-link');
+        if (forgotLink) {
+            forgotLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Placeholder for prototype
+                alert("Please contact the FSH IT Department to reset your password.\n\n(admin@firstasia.edu.ph)");
+            });
+        }
+
         // Buttons (Using IDs assigned in HTML)
         const btnLogin = document.getElementById('btn-login-continue');
         if (btnLogin) btnLogin.addEventListener('click', () => this.handleLogin());
