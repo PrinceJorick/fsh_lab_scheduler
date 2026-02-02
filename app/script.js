@@ -1,523 +1,314 @@
-let selectedRole = "";
-let confirmedEmail = ""; // Store the confirmed email for step 2
+/* app/script.js */
 
-// --- LOGIN PAGE LOGIC ---
-function handleSelection(clickedBtn) {
-    const selectionView = document.getElementById('selection-view');
-    const loginView = document.getElementById('login-view');
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    const emailInput = document.querySelector('#login-email');
-    const loginPasswordInput = document.querySelector('#login-password');
-
-    if (!selectionView || !loginView) return; // safety check
-
-    selectedRole = clickedBtn.innerText;
+/**
+ * Service to handle data storage and authentication.
+ * NOTE: LocalStorage is used for prototyping. In production, use a real backend.
+ */
+const AuthService = {
+    SCHOOL_DOMAIN: '@firstasia.edu.ph',
     
-    // UPDATED: Same placeholder for both Teacher and Student
-    emailInput.placeholder = "usernameid@firstasia.edu.ph"; 
+    isValidEmail(email) {
+        return email.endsWith(this.SCHOOL_DOMAIN);
+    },
 
-    // Clear login password and hide icon
-    if (loginPasswordInput) {
-        loginPasswordInput.value = '';
-        updatePasswordIconVisibility('login-password');
-    }
+    getUser(email) {
+        return JSON.parse(localStorage.getItem('user_' + email));
+    },
 
-    selectionView.style.display = 'none';
-    loginView.style.display = 'flex';
-    if (signupView) signupView.style.display = 'none';
-    if (signupPasswordView) signupPasswordView.style.display = 'none';
-    loginView.classList.add('fade-in');
+    registerUser(email, password, role) {
+        const userData = {
+            email,
+            password,
+            role,
+            createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('user_' + email, JSON.stringify(userData));
+        this.setSession(email, role);
+    },
 
-    setTimeout(() => loginView.classList.remove('fade-in'), 800);
-}
-
-function goBack() {
-    const selectionView = document.getElementById('selection-view');
-    const loginView = document.getElementById('login-view');
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    
-    // Clear all inputs
-    const allInputs = document.querySelectorAll('.login-input');
-    allInputs.forEach(input => {
-        input.classList.remove('input-error');
-        input.value = "";
-    });
-
-    // Reset confirmed email
-    confirmedEmail = "";
-
-    loginView.style.display = 'none';
-    if (signupView) signupView.style.display = 'none';
-    if (signupPasswordView) signupPasswordView.style.display = 'none';
-    selectionView.style.display = 'flex';
-    selectionView.classList.add('fade-in');
-
-    setTimeout(() => selectionView.classList.remove('fade-in'), 800);
-}
-
-// --- PASSWORD TOGGLE FUNCTION ---
-function togglePassword(inputId, icon) {
-    const input = document.getElementById(inputId);
-    
-    // Determine which page we're on and get both password fields
-    let otherInputId, otherIcon;
-    
-    if (inputId === 'login-password') {
-        // Only one password field on login
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    } else {
-        // Signup has two password fields - sync them
-        if (inputId === 'signup-password') {
-            otherInputId = 'signup-confirm-password';
-        } else {
-            otherInputId = 'signup-password';
-        }
+    loginUser(email, password) {
+        const user = this.getUser(email);
+        if (!user) return { success: false, message: 'No account found. Please sign up.' };
+        if (user.password !== password) return { success: false, message: 'Incorrect password.' };
         
-        const otherInput = document.getElementById(otherInputId);
-        const otherIconElement = otherInput.parentElement.querySelector('.password-toggle');
-        
-        // Toggle both fields together
-        if (input.type === 'password') {
-            input.type = 'text';
-            otherInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-            otherIconElement.classList.remove('fa-eye');
-            otherIconElement.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            otherInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-            otherIconElement.classList.remove('fa-eye-slash');
-            otherIconElement.classList.add('fa-eye');
-        }
-    }
-}
+        this.setSession(user.email, user.role);
+        return { success: true };
+    },
 
-// Show/hide eye icons based on input content
-function updatePasswordIconVisibility(inputId) {
-    const input = document.getElementById(inputId);
-    const icon = input.parentElement.querySelector('.password-toggle');
-    
-    if (input && icon) {
-        if (input.value.length > 0) {
-            icon.style.display = 'block';
-        } else {
-            icon.style.display = 'none';
-        }
-    }
-}
-
-// --- SIGN UP FUNCTIONS ---
-function showSignup() {
-    const loginView = document.getElementById('login-view');
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    const loginPasswordInput = document.querySelector('#login-password');
-    
-    if (!signupView) return;
-    
-    // Clear login password and hide icon
-    if (loginPasswordInput) {
-        loginPasswordInput.value = '';
-        updatePasswordIconVisibility('login-password');
-    }
-    
-    // UPDATED: Same placeholder for both roles
-    const signupEmailInput = document.getElementById('signup-email');
-    if (signupEmailInput) {
-        signupEmailInput.placeholder = "usernameid@firstasia.edu.ph";
-    }
-    
-    loginView.style.display = 'none';
-    signupView.style.display = 'flex';
-    if (signupPasswordView) signupPasswordView.style.display = 'none';
-    signupView.classList.add('fade-in');
-    
-    setTimeout(() => signupView.classList.remove('fade-in'), 800);
-}
-
-function showLoginFromSignup() {
-    const loginView = document.getElementById('login-view');
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    const loginPasswordInput = document.querySelector('#login-password');
-    
-    if (!loginView) return;
-    
-    // Clear login password and hide icon
-    if (loginPasswordInput) {
-        loginPasswordInput.value = '';
-        updatePasswordIconVisibility('login-password');
-    }
-    
-    signupView.style.display = 'none';
-    if (signupPasswordView) signupPasswordView.style.display = 'none';
-    loginView.style.display = 'flex';
-    loginView.classList.add('fade-in');
-    
-    // Reset confirmed email
-    confirmedEmail = "";
-    
-    setTimeout(() => loginView.classList.remove('fade-in'), 800);
-}
-
-// Step 1: Confirm Email
-function confirmEmail() {
-    const email = document.getElementById('signup-email').value.trim().toLowerCase();
-    const emailInput = document.getElementById('signup-email');
-    
-    // Remove previous error state
-    emailInput.classList.remove('input-error');
-    
-    // Validate email domain
-    if (!email.endsWith('@firstasia.edu.ph')) {
-        emailInput.classList.add('input-error');
-        emailInput.value = "";
-        emailInput.placeholder = "Access Denied: Use school email";
-        return;
-    }
-    
-    // Check if user already exists
-    const existingUser = localStorage.getItem('user_' + email);
-    if (existingUser) {
-        emailInput.classList.add('input-error');
-        alert('An account with this email already exists. Please sign in.');
-        return;
-    }
-    
-    // Email is valid, move to password step
-    confirmedEmail = email;
-    
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    const emailDisplay = document.getElementById('signup-email-display');
-    
-    if (emailDisplay) {
-        emailDisplay.textContent = confirmedEmail;
-    }
-    
-    // Clear password fields and hide icons
-    const passwordInput = document.getElementById('signup-password');
-    const confirmPasswordInput = document.getElementById('signup-confirm-password');
-    if (passwordInput) {
-        passwordInput.value = '';
-        updatePasswordIconVisibility('signup-password');
-    }
-    if (confirmPasswordInput) {
-        confirmPasswordInput.value = '';
-        updatePasswordIconVisibility('signup-confirm-password');
-    }
-    
-    signupView.style.display = 'none';
-    signupPasswordView.style.display = 'flex';
-    signupPasswordView.classList.add('fade-in');
-    
-    setTimeout(() => signupPasswordView.classList.remove('fade-in'), 800);
-}
-
-// Step 2: Create Password
-function handleSignup() {
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-confirm-password').value;
-    
-    const passwordInput = document.getElementById('signup-password');
-    const confirmPasswordInput = document.getElementById('signup-confirm-password');
-    
-    // Remove previous error states
-    passwordInput.classList.remove('input-error');
-    confirmPasswordInput.classList.remove('input-error');
-    
-    // Validate password length
-    if (password.length < 6) {
-        passwordInput.classList.add('input-error');
-        alert('Password must be at least 6 characters long');
-        return;
-    }
-    
-    // Validate passwords match
-    if (password !== confirmPassword) {
-        confirmPasswordInput.classList.add('input-error');
-        alert('Passwords do not match');
-        return;
-    }
-    
-    // Store user data
-    const userData = {
-        email: confirmedEmail,
-        password: password,
-        role: selectedRole,
-        createdAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('user_' + confirmedEmail, JSON.stringify(userData));
-    
-    // Set current user and redirect
-    localStorage.setItem('fsh_user_email', confirmedEmail);
-    localStorage.setItem('fsh_user_role', selectedRole);
-    
-    window.location.href = "dashboard.html";
-}
-
-// Go back to email step
-function backToEmailStep() {
-    const signupView = document.getElementById('signup-view');
-    const signupPasswordView = document.getElementById('signup-password-view');
-    
-    // Clear password inputs and hide icons
-    const passwordInput = document.getElementById('signup-password');
-    const confirmPasswordInput = document.getElementById('signup-confirm-password');
-    
-    if (passwordInput) {
-        passwordInput.value = '';
-        passwordInput.classList.remove('input-error');
-        updatePasswordIconVisibility('signup-password');
-    }
-    
-    if (confirmPasswordInput) {
-        confirmPasswordInput.value = '';
-        confirmPasswordInput.classList.remove('input-error');
-        updatePasswordIconVisibility('signup-confirm-password');
-    }
-    
-    signupPasswordView.style.display = 'none';
-    signupView.style.display = 'flex';
-    signupView.classList.add('fade-in');
-    
-    setTimeout(() => signupView.classList.remove('fade-in'), 800);
-}
-
-// --- LOGIN LOGIC (Updated) ---
-const enterBtn = document.querySelector('.enter-btn');
-const emailInput = document.querySelector('#login-email');
-const passwordInput = document.querySelector('#login-password');
-
-if (enterBtn && emailInput) {
-    enterBtn.addEventListener('click', () => {
-        const email = emailInput.value.trim().toLowerCase();
-        const password = passwordInput ? passwordInput.value : '';
-
-        // Remove previous errors
-        emailInput.classList.remove('input-error');
-        if (passwordInput) passwordInput.classList.remove('input-error');
-
-        // Validate email domain
-        if (!email.endsWith('@firstasia.edu.ph')) {
-            emailInput.classList.add('input-error');
-            emailInput.value = ""; 
-            emailInput.placeholder = "Access Denied: Use school email";
-            return;
-        }
-
-        // If password field exists, validate login
-        if (passwordInput) {
-            const storedUser = localStorage.getItem('user_' + email);
-            
-            if (!storedUser) {
-                emailInput.classList.add('input-error');
-                alert('No account found. Please sign up first.');
-                return;
-            }
-            
-            const userData = JSON.parse(storedUser);
-            
-            if (userData.password !== password) {
-                passwordInput.classList.add('input-error');
-                alert('Incorrect password');
-                return;
-            }
-            
-            // Use stored role
-            selectedRole = userData.role;
-        }
-
-        // Success - store and redirect
+    setSession(email, role) {
         localStorage.setItem('fsh_user_email', email);
-        localStorage.setItem('fsh_user_role', selectedRole);
-        window.location.href = "dashboard.html"; 
-    });
+        localStorage.setItem('fsh_user_role', role);
+    },
 
-    emailInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            enterBtn.click();
+    getSession() {
+        return {
+            email: localStorage.getItem('fsh_user_email'),
+            role: localStorage.getItem('fsh_user_role')
+        };
+    },
+
+    logout() {
+        localStorage.removeItem('fsh_user_email');
+        localStorage.removeItem('fsh_user_role');
+        window.location.href = "index.html";
+    }
+};
+
+/**
+ * Handles UI transitions and Form Interactions
+ */
+const UIManager = {
+    selectedRole: 'Student', // Default
+    signupEmail: '',
+
+    init() {
+        this.cacheDOM();
+        this.bindEvents();
+        this.checkPageContext();
+    },
+
+    cacheDOM() {
+        // Views
+        this.views = {
+            selection: document.getElementById('selection-view'),
+            login: document.getElementById('login-view'),
+            signup: document.getElementById('signup-view'),
+            signupPass: document.getElementById('signup-password-view')
+        };
+
+        // Inputs
+        this.inputs = {
+            loginEmail: document.getElementById('login-email'),
+            loginPass: document.getElementById('login-password'),
+            signupEmail: document.getElementById('signup-email'),
+            signupPass: document.getElementById('signup-password'),
+            signupConfirm: document.getElementById('signup-confirm-password')
+        };
+
+        // Display Elements
+        this.display = {
+            signupEmail: document.getElementById('signup-email-display'),
+            userDisplay: document.getElementById('user-display')
+        };
+    },
+
+    bindEvents() {
+        // Global clicks (using delegation or direct binding if IDs exist)
+        document.querySelectorAll('.role-select-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleRoleSelection(e.target.innerText));
+        });
+
+        // Toggle Password Visibility
+        document.querySelectorAll('.password-toggle').forEach(icon => {
+            icon.addEventListener('click', (e) => this.togglePasswordVisibility(e.target));
+        });
+
+        // Input Monitors (to hide/show eye icon and clear errors)
+        Object.values(this.inputs).forEach(input => {
+            if(!input) return;
+            input.addEventListener('input', (e) => {
+                e.target.classList.remove('input-error');
+                this.updateEyeIcon(e.target);
+            });
+        });
+
+        // Buttons (Using IDs assigned in HTML)
+        const btnLogin = document.getElementById('btn-login-continue');
+        if (btnLogin) btnLogin.addEventListener('click', () => this.handleLogin());
+
+        const btnSignupEmail = document.getElementById('btn-signup-email-continue');
+        if (btnSignupEmail) btnSignupEmail.addEventListener('click', () => this.handleSignupEmail());
+
+        const btnSignupCreate = document.getElementById('btn-signup-create');
+        if (btnSignupCreate) btnSignupCreate.addEventListener('click', () => this.handleSignupFinalize());
+
+        // Navigation Buttons
+        document.querySelectorAll('.btn-show-signup').forEach(b => b.addEventListener('click', () => this.switchView('signup')));
+        document.querySelectorAll('.btn-show-login').forEach(b => b.addEventListener('click', () => this.switchView('login')));
+        document.querySelectorAll('.btn-go-back').forEach(b => b.addEventListener('click', (e) => this.handleBack(e)));
+
+        // Lab Cards
+        document.querySelectorAll('.lab-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const labName = card.querySelector('h3').innerText;
+                console.log(`Lab Selected: ${labName}`);
+                // window.location.href = `booking.html?lab=${encodeURIComponent(labName)}`;
+            });
+        });
+    },
+
+    checkPageContext() {
+        if (window.location.pathname.includes('dashboard.html')) {
+            const session = AuthService.getSession();
+            if (!session.email) {
+                window.location.href = 'index.html';
+                return;
+            }
+            if (this.display.userDisplay) {
+                const name = session.email.split('@')[0];
+                this.display.userDisplay.innerText = `${name} (${session.role})`;
+            }
         }
-    });
+    },
 
-    emailInput.addEventListener('input', () => {
-        emailInput.classList.remove('input-error');
-    });
-}
+    // --- Actions ---
 
-// Add input listeners for signup fields
-const signupEmailInput = document.getElementById('signup-email');
-const signupPasswordInput = document.getElementById('signup-password');
-const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+    handleRoleSelection(role) {
+        this.selectedRole = role;
+        if (this.inputs.loginEmail) this.inputs.loginEmail.placeholder = "usernameid@firstasia.edu.ph";
+        this.switchView('login');
+    },
 
-if (signupEmailInput) {
-    signupEmailInput.addEventListener('input', () => {
-        signupEmailInput.classList.remove('input-error');
-    });
-    
-    signupEmailInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            confirmEmail();
-        }
-    });
-}
+    handleLogin() {
+        const email = this.inputs.loginEmail.value.trim().toLowerCase();
+        const pass = this.inputs.loginPass.value;
 
-if (signupPasswordInput) {
-    signupPasswordInput.addEventListener('input', () => {
-        signupPasswordInput.classList.remove('input-error');
-        updatePasswordIconVisibility('signup-password');
-    });
-}
-
-if (signupConfirmPasswordInput) {
-    signupConfirmPasswordInput.addEventListener('input', () => {
-        signupConfirmPasswordInput.classList.remove('input-error');
-        updatePasswordIconVisibility('signup-confirm-password');
-    });
-    
-    signupConfirmPasswordInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            handleSignup();
-        }
-    });
-}
-
-// Add listener for login password field
-if (passwordInput) {
-    passwordInput.addEventListener('input', () => {
-        updatePasswordIconVisibility('login-password');
-    });
-}
-
-// --- DASHBOARD PAGE LOGIC ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Hide all password toggle icons on page load
-    const allPasswordToggles = document.querySelectorAll('.password-toggle');
-    allPasswordToggles.forEach(icon => {
-        icon.style.display = 'none';
-    });
-    
-    // only run if on scheduler page
-    if (window.location.pathname.includes("dashboard.html")) {
-        const email = localStorage.getItem('fsh_user_email');
-        const role = localStorage.getItem('fsh_user_role');
-
-        // security check
-        if (!email) {
-            window.location.href = "index.html";
+        if (!AuthService.isValidEmail(email)) {
+            this.showError(this.inputs.loginEmail, "Access Denied: Use school email");
             return;
         }
 
-        const userDisplay = document.getElementById('user-display');
-        if (userDisplay) {
-            const userName = email.split('@')[0];
-            userDisplay.innerText = `${userName} (${role})`;
+        const result = AuthService.loginUser(email, pass);
+        if (result.success) {
+            window.location.href = "dashboard.html";
+        } else {
+            this.showError(result.message.includes('password') ? this.inputs.loginPass : this.inputs.loginEmail, result.message);
         }
+    },
+
+    handleSignupEmail() {
+        const email = this.inputs.signupEmail.value.trim().toLowerCase();
+        if (!AuthService.isValidEmail(email)) {
+            this.showError(this.inputs.signupEmail, "Access Denied: Use school email");
+            return;
+        }
+        if (AuthService.getUser(email)) {
+            this.showError(this.inputs.signupEmail, "Account exists. Please sign in.");
+            return;
+        }
+
+        this.signupEmail = email;
+        if (this.display.signupEmail) this.display.signupEmail.innerText = email;
+        this.switchView('signupPass');
+    },
+
+    handleSignupFinalize() {
+        const pass = this.inputs.signupPass.value;
+        const confirm = this.inputs.signupConfirm.value;
+
+        if (pass.length < 6) {
+            this.showError(this.inputs.signupPass, "Password too short (min 6 chars)");
+            return;
+        }
+        if (pass !== confirm) {
+            this.showError(this.inputs.signupConfirm, "Passwords do not match");
+            return;
+        }
+
+        AuthService.registerUser(this.signupEmail, pass, this.selectedRole);
+        window.location.href = "dashboard.html";
+    },
+
+    handleBack(e) {
+        // Logic to determine where 'back' goes based on current visibility
+        if (this.views.signupPass.style.display === 'flex') {
+            this.switchView('signup');
+        } else {
+            this.switchView('selection');
+            this.resetForms();
+        }
+    },
+
+    // --- Helpers ---
+
+    switchView(viewName) {
+        // Hide all
+        Object.values(this.views).forEach(el => { if(el) el.style.display = 'none'; });
+        
+        // Show target
+        const target = this.views[viewName];
+        if (target) {
+            target.style.display = 'flex';
+            target.classList.add('fade-in');
+            setTimeout(() => target.classList.remove('fade-in'), 800);
+        }
+    },
+
+    resetForms() {
+        Object.values(this.inputs).forEach(input => {
+            if(input) {
+                input.value = '';
+                input.classList.remove('input-error');
+            }
+        });
+        document.querySelectorAll('.password-toggle').forEach(el => el.style.display = 'none');
+    },
+
+    showError(inputElement, msg) {
+        inputElement.classList.add('input-error');
+        if(msg) alert(msg); // Ideally replace with a UI toast/text element
+    },
+
+    togglePasswordVisibility(iconElement) {
+        const container = iconElement.parentElement;
+        const input = container.querySelector('input');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            iconElement.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            iconElement.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    },
+
+    updateEyeIcon(input) {
+        const icon = input.parentElement.querySelector('.password-toggle');
+        if (icon) icon.style.display = input.value.length > 0 ? 'block' : 'none';
     }
+};
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', () => {
+    UIManager.init();
 });
 
-// global functions
-function logout() {
-    localStorage.clear();
-    window.location.href = "index.html";
-}
 
-function selectLab(labName) {
-    console.log("Lab selected: " + labName);
-    // future thing, disregard for now; window.location.href = `booking.html?lab=${labName}`;
-}
-
-// --- GOOGLE SIGN-IN IMPLEMENTATION ---
-
-function handleCredentialResponse(response) {
-    // 1. Decode the Google JWT (JSON Web Token) to get user info
+// --- Google Sign-In Integration ---
+window.handleCredentialResponse = function(response) {
     const responsePayload = decodeJwtResponse(response.credential);
-
-    console.log("ID: " + responsePayload.sub);
-    console.log("Email: " + responsePayload.email);
-
-    // 2. Validate Domain (matches your existing logic)
-    // Note: 'hd' stands for Hosted Domain (e.g., firstasia.edu.ph)
+    
     if (responsePayload.hd !== 'firstasia.edu.ph') {
         alert("Access Denied: Please sign in with your school email (@firstasia.edu.ph).");
         return;
     }
 
-    // 3. Save to Local Storage (reusing your existing app logic)
-    // We use the global 'selectedRole' variable you defined at the top of script.js
-    if (!selectedRole) {
-        selectedRole = "Student"; // Default fallback if they didn't click a toggle
-    }
-
-    localStorage.setItem('fsh_user_email', responsePayload.email);
-    localStorage.setItem('fsh_user_role', selectedRole);
-
-    // 4. Redirect to Dashboard
+    AuthService.setSession(responsePayload.email, UIManager.selectedRole);
     window.location.href = "dashboard.html";
-}
+};
 
-// Helper function to decode the JWT token from Google
 function decodeJwtResponse(token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-
     return JSON.parse(jsonPayload);
 }
 
-// Initialize Google Button when the page loads
 window.onload = function () {
-    const buttonDivLogin = document.getElementById("buttonDiv-login");
-    const buttonDivSignup = document.getElementById("buttonDiv-signup");
-    
-    if (typeof google !== 'undefined') {
+    if (typeof google !== 'undefined' && document.getElementById("buttonDiv-login")) {
         google.accounts.id.initialize({
             client_id: "238536479920-v18ac5qcfh6t0vmp8evjk381g4b6ssl4.apps.googleusercontent.com",
             callback: handleCredentialResponse
         });
         
-        // Render button in login view
-        if (buttonDivLogin) {
-            google.accounts.id.renderButton(
-                buttonDivLogin,
-                { 
-                    theme: "filled_black",
-                    size: "large", 
-                    shape: "pill",
-                    width: "320"
-                } 
-            );
-        }
+        const renderConfig = { theme: "filled_black", size: "large", shape: "pill", width: "320" };
         
-        // Render button in signup view
-        if (buttonDivSignup) {
-            google.accounts.id.renderButton(
-                buttonDivSignup,
-                { 
-                    theme: "filled_black",
-                    size: "large", 
-                    shape: "pill",
-                    width: "320"
-                } 
-            );
-        }
+        const loginDiv = document.getElementById("buttonDiv-login");
+        if(loginDiv) google.accounts.id.renderButton(loginDiv, renderConfig);
         
-        google.accounts.id.prompt(); 
+        const signupDiv = document.getElementById("buttonDiv-signup");
+        if(signupDiv) google.accounts.id.renderButton(signupDiv, renderConfig);
     }
 };
