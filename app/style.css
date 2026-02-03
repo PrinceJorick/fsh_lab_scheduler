@@ -481,6 +481,10 @@ nav img{
    LABORATORY PAGE STYLES
    ============================================================================ */
 
+/* ============================================================================
+   LABORATORY HEADER WITH RIGHT-ALIGNED BUTTON
+   ============================================================================ */
+
 .lab-header {
     background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
     color: white;
@@ -488,14 +492,60 @@ nav img{
     margin-bottom: 40px;
 }
 
-.lab-header h1 {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    margin-bottom: 10px;
+.lab-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.lab-header p {
-    font-size: clamp(0.875rem, 2vw, 1rem);
-    opacity: 0.9;
+.lab-header-left {
+    flex: 1;
+}
+
+.lab-header-left h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    margin-bottom: 10px;
+    color: white;
+}
+
+.lab-header-left p {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.lab-header-right {
+    flex-shrink: 0;
+}
+
+.lab-header-right .back-btn {
+    background: white;
+    color: #081316;
+    border: 2px solid white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.lab-header-right .back-btn:hover {
+    background: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lab-header-right .back-btn i {
+    font-size: 14px;
 }
 
 .calendar-container {
@@ -936,6 +986,10 @@ nav img{
         border-radius: 0 0 30px 30px;
     }
 
+    .main-content {
+        padding:15px 5% 40px 5%; 
+    } 
+
     .content {
         padding: 40px 20px;
         justify-content: flex-start;
@@ -960,7 +1014,7 @@ nav img{
     }
 
     .dashboard-container {
-        padding-top: 100px;
+        padding-top: 140px;
     }
 
     .calendar-container,
@@ -985,6 +1039,25 @@ nav img{
 
     .lab-header {
         padding: 30px 5%;
+    }
+
+    .lab-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .lab-header-left {
+        width: 100%;
+    }
+
+    .lab-header-right {
+        width: 100%;
+    }
+
+    .lab-header-right .back-btn {
+        width: 100%;
+        justify-content: center;
     }
 
     .reservation-header {

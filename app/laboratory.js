@@ -146,7 +146,10 @@ function handleReservationSubmit(e) {
     
     // Save reservation
     saveReservation(formData);
-    
+
+    // Send notification to admin
+    sendAdminNotification(formData);
+
     // Show success message
     alert('Reservation submitted successfully! Waiting for admin approval.');
     
@@ -467,6 +470,48 @@ function formatDateForStorage(date) {
 
 function goBackToDashboard() {
     window.location.href = 'dashboard.html';
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+function sendAdminNotification(reservationData) {
+    // Create notification object
+    const notification = {
+        id: Date.now().toString(),
+        type: 'new_reservation',
+        title: 'New Reservation Request',
+        message: `${reservationData.requester.split('@')[0]} requested ${reservationData.lab} for ${formatDate(reservationData.date)} at ${reservationData.timeSlot}`,
+        reservationId: reservationData.id,
+        read: false,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Get existing notifications
+    const notifications = getAdminNotifications();
+    
+    // Add new notification at the beginning
+    notifications.unshift(notification);
+    
+    // Save to localStorage
+    localStorage.setItem('fsh_admin_notifications', JSON.stringify(notifications));
+    
+    // Update notification badge count
+    updateNotificationBadge();
+}
+
+function getAdminNotifications() {
+    const data = localStorage.getItem('fsh_admin_notifications');
+    return data ? JSON.parse(data) : [];
+}
+
+function updateNotificationBadge() {
+    const notifications = getAdminNotifications();
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    // Store unread count
+    localStorage.setItem('fsh_unread_notifications', unreadCount.toString());
 }
 
 // Make functions globally available

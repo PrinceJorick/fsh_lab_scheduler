@@ -1,0 +1,410 @@
+/* ============================================================================
+   PROFILE PAGE HEADER WITH RIGHT-ALIGNED BUTTON
+   ============================================================================ */
+
+.profile-header {
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    color: white;
+    padding: 40px 5%;
+    margin-bottom: 0;
+}
+
+.profile-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.profile-header-left {
+    flex: 1;
+}
+
+.profile-header-left h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    margin-bottom: 0;
+    color: white;
+}
+
+.profile-header-right {
+    flex-shrink: 0;
+}
+
+.profile-header-right .back-btn {
+    background: white;
+    color: #081316;
+    border: 2px solid white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.profile-header-right .back-btn:hover {
+    background: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.profile-header-right .back-btn i {
+    font-size: 14px;
+}
+
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding: 40px 0;
+}
+
+/* ============================================================================
+   PROFILE CARD
+   ============================================================================ */
+
+.profile-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.profile-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 50px;
+}
+
+.profile-info h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: #081316;
+    margin-bottom: 5px;
+}
+
+.profile-info p {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    color: #707475;
+    margin-bottom: 10px;
+}
+
+.profile-role-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #081316;
+    color: white;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   SETTINGS CARDS
+   ============================================================================ */
+
+.settings-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.settings-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.settings-card h3 {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: #081316;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-card h3 i {
+    font-size: 20px;
+}
+
+.card-description {
+    font-size: 14px;
+    color: #707475;
+    margin-bottom: 20px;
+}
+
+/* ============================================================================
+   PROFILE PAGE BUTTONS
+   ============================================================================ */
+
+.change-password-btn,
+.logout-btn {
+    width: 100%;
+    padding: 12px 24px;
+    border: 1px solid #081316;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.change-password-btn {
+    background: #081316;
+    color: white;
+}
+
+.change-password-btn:hover {
+    background: white;
+    color: #081316;
+    transform: translateY(-2px);
+}
+
+.logout-btn {
+    background: white;
+    color: #ff4d4d;
+    border: 1px solid #ff4d4d;
+}
+
+.logout-btn:hover {
+    background: #ff4d4d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   MODAL STYLES
+   ============================================================================ */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    color: white;
+}
+
+.modal-header h2 {
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    margin: 0;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-form {
+    padding: 30px;
+}
+
+.modal-form .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-form .form-group:last-of-type {
+    margin-bottom: 25px;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #081316;
+    font-size: 14px;
+}
+
+.modal-form small {
+    font-size: 12px;
+}
+
+/* ============================================================================
+   MODAL ACTIONS
+   ============================================================================ */
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.cancel-btn,
+.submit-btn {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.cancel-btn {
+    background: white;
+    color: #707475;
+    border: 1px solid #707475;
+}
+
+.cancel-btn:hover {
+    background: #f9f9f9;
+    transform: translateY(-2px);
+}
+
+.submit-btn {
+    background: #081316;
+    color: white;
+}
+
+.submit-btn:hover {
+    background: #2a3a3f;
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .profile-header {
+        padding: 30px 5%;
+    }
+
+    .profile-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .profile-header-left {
+        width: 100%;
+    }
+
+    .profile-header-right {
+        width: 100%;
+    }
+
+    .profile-header-right .back-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profile-container {
+        padding: 0 20px;
+    }
+
+    .profile-card {
+        padding: 30px 20px;
+    }
+
+    .settings-card {
+        padding: 25px 20px;
+    }
+
+    .modal-content {
+        width: 95%;
+    }
+
+    .modal-form {
+        padding: 25px 20px;
+    }
+
+    .modal-header {
+        padding: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        width: 100%;
+    }
+}

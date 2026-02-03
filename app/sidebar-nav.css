@@ -1,0 +1,274 @@
+/* ============================================================================
+   COLLAPSIBLE SIDEBAR NAVIGATION WITH PULL TAB
+   ============================================================================ */
+
+/* Profile section with label */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-link:hover {
+    transform: scale(1.1);
+}
+
+.profile-link img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.profile-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #081316;
+    text-align: center;
+}
+
+/* Pull Tab Button */
+.menu-toggle {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 1001;
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    border: none;
+    border-radius: 0 12px 12px 0;
+    width: 45px;
+    height: 120px;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+.menu-toggle:hover {
+    width: 50px;
+    background: linear-gradient(135deg, #2a3a3f 0%, #081316 100%);
+}
+
+.menu-toggle.active {
+    left: 220px;
+}
+
+.menu-toggle i {
+    color: white;
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.menu-toggle.active i {
+    transform: rotate(180deg);
+}
+
+.tab-text {
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Desktop styles - Collapsible Sidebar */
+@media (min-width: 769px) {
+    .dash-nav {
+        position: fixed;
+        top: 0;
+        left: -220px;
+        width: 220px;
+        height: 100vh;
+        background-color: #ffffff;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        z-index: 1000;
+        padding: 30px 15px;
+        transition: left 0.3s ease;
+    }
+
+    .dash-nav.active {
+        left: 0;
+    }
+
+    .dash-nav nav {
+        position: static;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        padding: 0;
+        height: 100%;
+    }
+
+    .dash-nav img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        margin-bottom: 15px;
+    }
+
+    .nav-right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        margin-top: auto;
+        padding-top: 25px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    #user-display {
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        word-break: break-word;
+    }
+
+    .profile-link {
+        width: 45px;
+        height: 45px;
+    }
+
+    .dashboard-container {
+        padding-left: 0;
+        padding-top: 0;
+    }
+
+    .profile-header,
+    .lab-header {
+        margin-left: 0;
+    }
+}
+
+/* Mobile styles - Pull tab becomes hamburger at top */
+@media (max-width: 768px) {
+    .menu-toggle {
+        position: fixed;
+        top: 15px;
+        left: 20px;
+        transform: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        flex-direction: row;
+        gap: 0;
+    }
+
+    .menu-toggle.active {
+        left: 20px;
+    }
+
+    .menu-toggle i {
+        font-size: 24px;
+    }
+
+    .tab-text {
+        display: none;
+    }
+
+    .dash-nav {
+        background-color: #ffffff;
+        position: fixed;
+        top: -100%;
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: 40vh;
+        z-index: 1000;
+        padding: 40px 5% 30px 5%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: top 0.3s ease;
+        overflow-y: auto;
+    }
+
+    .dash-nav.active {
+        top: 0;
+    }
+
+    .dash-nav nav {
+        position: static;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        gap: 20px;
+    }
+
+    .dash-nav img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        margin-bottom: 5px;
+    }
+
+    .nav-right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding-top: 15px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    #user-display {
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .profile-link {
+        width: 40px;
+        height: 40px;
+    }
+
+    .dashboard-container {
+        padding-top: 80px;
+        padding-left: 0;
+    }
+}
+
+/* Prevent scrolling when menu is open */
+body.menu-open {
+    overflow: hidden;
+}

@@ -5,6 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="sidebar-nav.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -15,17 +16,31 @@
             <header class="dash-nav">
                 <nav>
                     <a href="dashboard.html"><img src="../public/fsh_logo_black.png"></a>
-                    <p id="user-display"></p>
+                    <div class="nav-right">
+                        <p id="user-display"></p>
+                        <div class="profile-section">
+                            <a href="profile.html" class="profile-link" title="Profile">
+                                <img src="../public/User_Circle.png" alt="Profile">
+                            </a>
+                            <span class="profile-label">Profile</span>
+                        </div>
+                    </div>
                 </nav>
             </header>
 
             <div class="lab-header">
-                <button class="back-btn" onclick="goBackToDashboard()" style="margin-bottom: 20px;">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back to Dashboard</span>
-                </button>
-                <h1 id="lab-name">Laboratory</h1>
-                <p>Select a date and time to make a reservation</p>
+                <div class="lab-header-content">
+                    <div class="lab-header-left">
+                        <h1 id="lab-name">Laboratory</h1>
+                        <p>Select a date and time to make a reservation</p>
+                    </div>
+                    <div class="lab-header-right">
+                        <button class="back-btn" onclick="goBackToDashboard()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Dashboard</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <main class="main-content">
@@ -122,6 +137,7 @@
             </main>
         </div>
 
+        <script src="sidebar-nav.js"></script>
         <script src="ui.js"></script>
         <script>
             // Get lab name from URL and update page
