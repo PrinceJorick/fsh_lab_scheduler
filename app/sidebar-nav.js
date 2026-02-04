@@ -1,22 +1,20 @@
 // ============================================================================
-// SIDEBAR-NAV.JS - Pull Tab Sidebar Navigation
+// SIDEBAR-NAV.JS - Pull Tab Sidebar Navigation + Dark Mode Toggle
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeSidebar();
+    initializeDarkMode();
 });
 
 function initializeSidebar() {
-    // Create pull tab button
+    // Create hamburger button (now in upper right)
     const menuToggle = document.createElement('button');
     menuToggle.className = 'menu-toggle';
     menuToggle.setAttribute('aria-label', 'Toggle Menu');
     
-    // Add icon and text to pull tab
-    menuToggle.innerHTML = `
-        <i class="fas fa-chevron-right"></i>
-        <span class="tab-text">MENU</span>
-    `;
+    // Add hamburger icon
+    menuToggle.innerHTML = `<i class="fas fa-bars"></i>`;
     
     // Create overlay
     const overlay = document.createElement('div');
@@ -45,14 +43,9 @@ function initializeSidebar() {
         document.body.classList.add('menu-open');
         menuToggle.classList.add('active');
         
-        // Update icon for desktop (chevron rotates)
+        // Change to X icon
         const icon = menuToggle.querySelector('i');
-        if (window.innerWidth > 768) {
-            // Icon rotation is handled by CSS
-        } else {
-            // Mobile: change to X icon
-            icon.className = 'fas fa-times';
-        }
+        icon.className = 'fas fa-times';
     }
     
     function closeSidebar() {
@@ -61,13 +54,9 @@ function initializeSidebar() {
         document.body.classList.remove('menu-open');
         menuToggle.classList.remove('active');
         
-        // Update icon
+        // Change back to hamburger icon
         const icon = menuToggle.querySelector('i');
-        if (window.innerWidth > 768) {
-            icon.className = 'fas fa-chevron-right';
-        } else {
-            icon.className = 'fas fa-bars';
-        }
+        icon.className = 'fas fa-bars';
     }
     
     // Event listeners
@@ -89,33 +78,50 @@ function initializeSidebar() {
             closeSidebar();
         }
     });
+}
+
+// ============================================================================
+// DARK MODE FUNCTIONALITY
+// ============================================================================
+
+function initializeDarkMode() {
+    // Create dark mode toggle button (in upper left)
+    const themeToggle = document.createElement('button');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.setAttribute('aria-label', 'Toggle Dark Mode');
     
-    // Handle window resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            const icon = menuToggle.querySelector('i');
-            if (window.innerWidth > 768) {
-                if (dashNav.classList.contains('active')) {
-                    icon.className = 'fas fa-chevron-right';
-                } else {
-                    icon.className = 'fas fa-chevron-right';
-                }
-            } else {
-                if (dashNav.classList.contains('active')) {
-                    icon.className = 'fas fa-times';
-                } else {
-                    icon.className = 'fas fa-bars';
-                }
-            }
-        }, 250);
+    // Check saved theme preference or default to light
+    const savedTheme = localStorage.getItem('fsh_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Set initial icon
+    updateThemeIcon(themeToggle, savedTheme);
+    
+    // Insert button into DOM
+    document.body.insertBefore(themeToggle, document.body.firstChild);
+    
+    // Toggle theme function
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('fsh_theme', newTheme);
+        updateThemeIcon(themeToggle, newTheme);
+        
+        // Add animation
+        themeToggle.style.transform = 'rotate(360deg) scale(1.1)';
+        setTimeout(() => {
+            themeToggle.style.transform = '';
+        }, 300);
     });
-    
-    // Set initial icon based on screen size
-    const icon = menuToggle.querySelector('i');
-    if (window.innerWidth <= 768) {
-        icon.className = 'fas fa-bars';
+}
+
+function updateThemeIcon(button, theme) {
+    if (theme === 'dark') {
+        button.innerHTML = '<i class="fas fa-moon"></i>';
+    } else {
+        button.innerHTML = '<i class="fas fa-sun"></i>';
     }
 }
 

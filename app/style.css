@@ -9,11 +9,52 @@ html, body {
     scrollbar-width: none;  /* Firefox */
 }
 
+/* ============================================================================
+   DARK MODE CSS VARIABLES
+   ============================================================================ */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #081316;
+    --secondary-text: #707475;
+    --nav-bg: #ffffff;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #081316;
+    --button-bg: #081316;
+    --button-text: #ffffff;
+    --hover-bg: #f0f0f0;
+    --shadow: rgba(0, 0, 0, 0.05);
+    --shadow-hover: rgba(0, 0, 0, 0.12);
+    --border-color: #e0e0e0;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --secondary-text: #b0b0b0;
+    --nav-bg: #2a2a2a;
+    --card-bg: #2a2a2a;
+    --input-bg: #333333;
+    --input-border: #555555;
+    --button-bg: #ffffff;
+    --button-text: #081316;
+    --hover-bg: #3a3a3a;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-hover: rgba(0, 0, 0, 0.5);
+    --border-color: #444444;
+}
+
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: "IBM Plex Sans", sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .hidden {
@@ -76,7 +117,7 @@ nav img{
 }
 
 .content h2 {
-    color: #707475;
+    color: var(--secondary-text);
     font-weight: 400;
     font-size: clamp(1rem, 2vw, 1.25rem);
     margin-bottom: 40px;
@@ -84,7 +125,7 @@ nav img{
 
 .content p{
     font-size: clamp(0.875rem, 1.5vw, 0.9rem);
-    color: #707475;
+    color: var(--secondary-text);
     margin-bottom: 10px;
 }
 
@@ -139,13 +180,13 @@ nav img{
     border: none;
     cursor: pointer;
     border-radius: 25px;
-    color: #707475;
+    color: var(--secondary-text);
     transition: all 0.3s ease; 
 }
 
 .toggle button:hover {
-    background-color: #081316;
-    color: #fff;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     font-weight: 300;
     transform: translateY(-1px);
 }
@@ -192,7 +233,7 @@ nav img{
     transform: translateY(-50%);
     margin-top: -6px;
     cursor: pointer;
-    color: #707475;
+    color: var(--secondary-text);
     font-size: 16px;
     transition: color 0.3s ease;
     user-select: none;
@@ -200,7 +241,7 @@ nav img{
 }
 
 .password-toggle:hover {
-    color: #081316;
+    color: var(--text-color);
 }
 
 /* ============================================================================
@@ -210,7 +251,7 @@ nav img{
 .forgot-password-link {
     align-self: flex-end;
     font-size: 14px;
-    color: #081316;
+    color: var(--text-color);
     font-weight: 500;
     text-decoration: none;
     margin-bottom: 15px;
@@ -219,7 +260,7 @@ nav img{
 }
 
 .forgot-password-link:hover {
-    color: #707475;
+    color: var(--secondary-text);
 }
 
 /* ============================================================================
@@ -233,7 +274,7 @@ nav img{
     font-weight: 400;
     margin-bottom: 10px;
     margin-top: -5px;
-    color: #707475;
+    color: var(--secondary-text);
 }
 
 /* ============================================================================
@@ -243,8 +284,8 @@ nav img{
 .google-btn {
     width: 100%;
     padding: 12px 24px;
-    background-color: #081316;
-    color: #FFFFFF;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     border: 1px solid transparent; 
     border-radius: 50px;
     display: flex;
@@ -259,9 +300,9 @@ nav img{
 }
 
 .google-btn:hover {
-    background-color: #ffffff;
-    color: #081316;
-    border: 1px solid #081316; 
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color); 
     transform: translateY(-1px);
 }
 
@@ -275,8 +316,8 @@ nav img{
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
-    background: #081316;
-    color: #ffffff;
+    background: var(--button-bg);
+    color: var(--button-text);
     border: 1px solid transparent; 
     border-radius: 50px;
     cursor: pointer;
@@ -285,19 +326,19 @@ nav img{
 }
 
 .enter-btn:hover {
-    background-color: #ffffff;
-    color: #081316;
-    border: 1px solid #081316; 
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color); 
     transform: translateY(-1px);
 }
 
 .back-btn {
-    background: #081316;
+    background: var(--button-bg);
     border: 1px solid transparent; 
     cursor: pointer;
     padding: 10px 20px;
     border-radius: 50px; 
-    color: #ffffff;
+    color: var(--button-text);
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -306,9 +347,9 @@ nav img{
 }
 
 .back-btn:hover {
-    color: #081316;
-    background-color: #ffffff;
-    border: 1px solid #081316;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    border: 1px solid var(--text-color);
     transform: translateY(-1px);
 }
 
@@ -329,7 +370,7 @@ nav img{
 
 .divider {
     margin: 10px 0;
-    color: #707475; 
+    color: var(--secondary-text); 
     font-size: 12px;
     display: flex;
     align-items: center;
@@ -340,7 +381,7 @@ nav img{
     content: "";
     flex: 1;
     height: 1px;
-    background: #707475;
+    background: var(--secondary-text);
     margin: 0 10px;
 }
 
@@ -351,11 +392,13 @@ nav img{
 .login-input {
     width: 100%;
     padding: 12px 20px;
-    border: 1px solid #081316;
+    border: 1px solid var(--input-border);
     border-radius: 50px;
     margin-bottom: 12px;
     outline: none;
     font-size: 14px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
 .input-error {
@@ -371,7 +414,7 @@ nav img{
 .dashboard-container {
     width: 100%;
     min-height: 100vh;
-    background-color: #ffffff;
+    background-color: var(--bg-color);
     padding-top: 110px;
 }
 
@@ -380,7 +423,7 @@ nav img{
    ============================================================================ */
 
 .dash-nav {
-    background-color: #ffffff; 
+    background-color: var(--nav-bg); 
     position: fixed;
     top: 0;
     left: 0;
@@ -389,7 +432,7 @@ nav img{
     display: flex;
     align-items: center; 
     padding: 30px 5%;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+    box-shadow: 0 2px 10px var(--shadow); 
 }
 
 .dash-nav nav {
@@ -426,7 +469,7 @@ nav img{
     font-size: clamp(2rem, 4vw, 2.5rem);
     font-weight: 700;
     margin-bottom: 30px;
-    color: #081316;
+    color: var(--text-color);
 }
 
 /* ============================================================================
@@ -444,18 +487,18 @@ nav img{
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: #f9f9f9;
+    background: var(--card-bg);
 }
 
 .lab-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 20px var(--shadow-hover);
 }
 
 .lab-image {
     height: 200px;
     width: 100%;
-    background-color: #e8e8e8;
+    background-color: var(--hover-bg);
     display: block;
     object-fit: cover;
 }
@@ -468,13 +511,13 @@ nav img{
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #707475;
+    color: var(--secondary-text);
 }
 
 .lab-info h3 {
     font-size: clamp(1.1rem, 2vw, 1.25rem);
     margin-top: 8px;
-    color: #081316;
+    color: var(--text-color);
 }
 
 /* ============================================================================
@@ -549,10 +592,10 @@ nav img{
 }
 
 .calendar-container {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px var(--shadow);
     margin-bottom: 30px;
 }
 
@@ -567,7 +610,7 @@ nav img{
 
 .calendar-header h2 {
     font-size: clamp(1.25rem, 3vw, 1.5rem);
-    color: #081316;
+    color: var(--text-color);
 }
 
 .calendar-nav {
@@ -577,8 +620,8 @@ nav img{
 }
 
 .calendar-nav button {
-    background: #081316;
-    color: white;
+    background: var(--button-bg);
+    color: var(--button-text);
     border: none;
     padding: 10px 15px;
     border-radius: 10px;
@@ -588,7 +631,7 @@ nav img{
 }
 
 .calendar-nav button:hover {
-    background: #2a3a3f;
+    opacity: 0.8;
     transform: translateY(-2px);
 }
 
@@ -597,6 +640,7 @@ nav img{
     min-width: 150px;
     text-align: center;
     font-size: clamp(14px, 2vw, 16px);
+    color: var(--text-color);
 }
 
 .calendar-grid {
@@ -609,7 +653,7 @@ nav img{
     text-align: center;
     font-weight: 600;
     padding: 10px;
-    color: #707475;
+    color: var(--secondary-text);
     font-size: clamp(12px, 1.5vw, 14px);
 }
 
@@ -624,10 +668,11 @@ nav img{
     position: relative;
     font-size: clamp(12px, 1.5vw, 14px);
     border: 2px solid transparent;
+    color: var(--text-color);
 }
 
 .calendar-day:not(.empty):not(.past):hover {
-    background: #f0f0f0;
+    background: var(--hover-bg);
     transform: scale(1.05);
 }
 
@@ -641,7 +686,7 @@ nav img{
 }
 
 .calendar-day.today {
-    border: 2px solid #081316;
+    border: 2px solid var(--text-color);
     font-weight: bold;
 }
 
@@ -671,17 +716,17 @@ nav img{
    ============================================================================ */
 
 .time-slots-container {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px var(--shadow);
     margin-bottom: 30px;
 }
 
 .time-slots-container h3 {
     font-size: clamp(1.1rem, 2.5vw, 1.25rem);
     margin-bottom: 20px;
-    color: #081316;
+    color: var(--text-color);
 }
 
 .time-slots-grid {
@@ -692,28 +737,30 @@ nav img{
 
 .time-slot {
     padding: 15px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: clamp(13px, 1.5vw, 14px);
+    background: var(--card-bg);
+    color: var(--text-color);
 }
 
 .time-slot:hover:not(.disabled) {
-    border-color: #081316;
+    border-color: var(--text-color);
     transform: translateY(-2px);
 }
 
 .time-slot.selected {
-    background: #081316;
-    color: white;
-    border-color: #081316;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border-color: var(--button-bg);
 }
 
 .time-slot.disabled {
-    background: #f5f5f5;
-    color: #ccc;
+    background: var(--hover-bg);
+    color: var(--secondary-text);
     cursor: not-allowed;
     opacity: 0.6;
 }
@@ -723,16 +770,25 @@ nav img{
    ============================================================================ */
 
 .reservation-form {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px var(--shadow);
 }
 
 .reservation-form h3 {
     font-size: clamp(1.1rem, 2.5vw, 1.25rem);
     margin-bottom: 20px;
-    color: #081316;
+    color: var(--text-color);
+}
+
+#selected-info {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+#selected-info p {
+    color: var(--text-color);
 }
 
 .form-group {
@@ -743,7 +799,7 @@ nav img{
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #081316;
+    color: var(--text-color);
     font-size: clamp(13px, 1.5vw, 14px);
 }
 
@@ -752,17 +808,19 @@ nav img{
 .form-group select {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     font-size: 14px;
     transition: border-color 0.3s ease;
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #081316;
+    border-color: var(--text-color);
 }
 
 .form-group textarea {
@@ -799,16 +857,16 @@ nav img{
    ============================================================================ */
 
 .admin-panel {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px var(--shadow);
 }
 
 .admin-panel h3 {
     font-size: clamp(1.1rem, 2.5vw, 1.25rem);
     margin-bottom: 20px;
-    color: #081316;
+    color: var(--text-color);
 }
 
 .reservations-list {
@@ -847,13 +905,13 @@ nav img{
 
 .reservation-info h4 {
     font-size: clamp(1rem, 2vw, 1.1rem);
-    color: #081316;
+    color: var(--text-color);
     margin-bottom: 5px;
 }
 
 .reservation-info p {
     font-size: clamp(13px, 1.5vw, 14px);
-    color: #707475;
+    color: var(--secondary-text);
     margin: 3px 0;
 }
 
@@ -921,7 +979,7 @@ nav img{
 .empty-state {
     text-align: center;
     padding: 40px;
-    color: #707475;
+    color: var(--secondary-text);
 }
 
 .empty-state i {
@@ -1005,8 +1063,12 @@ nav img{
         position: absolute; 
         width: 100%;
         padding: 20px;
-        background: linear-gradient(to bottom, #ffffff 65%, rgba(255, 255, 255, 0) 100%);
+        background: linear-gradient(to bottom, var(--nav-bg) 65%, rgba(255, 255, 255, 0) 100%);
         padding-bottom: 60px; 
+    }
+    
+    [data-theme="dark"] nav {
+        background: linear-gradient(to bottom, var(--nav-bg) 65%, rgba(26, 26, 26, 0) 100%);
     }
 
     .dash-nav {
