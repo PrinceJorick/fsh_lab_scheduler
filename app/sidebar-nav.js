@@ -8,24 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeSidebar() {
-    // Create hamburger button (now in upper right)
-    const menuToggle = document.createElement('button');
-    menuToggle.className = 'menu-toggle';
-    menuToggle.setAttribute('aria-label', 'Toggle Menu');
-    
-    // Add hamburger icon
-    menuToggle.innerHTML = `<i class="fas fa-bars"></i>`;
-    
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    
-    // Insert elements into DOM
-    document.body.insertBefore(menuToggle, document.body.firstChild);
-    document.body.insertBefore(overlay, document.body.firstChild);
-    
+    // 1. SELECT existing elements instead of creating them
+    const menuToggle = document.getElementById('menu-toggle');
     const dashNav = document.querySelector('.dash-nav');
     
+    // Create overlay dynamically (or check if it exists)
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    // Safety check: ensure button exists before adding listeners
+    if (!menuToggle) return;
+
     // Toggle sidebar function
     function toggleSidebar() {
         const isActive = dashNav.classList.contains('active');
@@ -45,7 +42,7 @@ function initializeSidebar() {
         
         // Change to X icon
         const icon = menuToggle.querySelector('i');
-        icon.className = 'fas fa-times';
+        if (icon) icon.className = 'fas fa-times';
     }
     
     function closeSidebar() {
@@ -56,7 +53,7 @@ function initializeSidebar() {
         
         // Change back to hamburger icon
         const icon = menuToggle.querySelector('i');
-        icon.className = 'fas fa-bars';
+        if (icon) icon.className = 'fas fa-bars';
     }
     
     // Event listeners
@@ -85,10 +82,11 @@ function initializeSidebar() {
 // ============================================================================
 
 function initializeDarkMode() {
-    // Create dark mode toggle button (in upper left)
-    const themeToggle = document.createElement('button');
-    themeToggle.className = 'theme-toggle';
-    themeToggle.setAttribute('aria-label', 'Toggle Dark Mode');
+    // 1. SELECT existing button instead of creating it
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    // Safety check
+    if (!themeToggle) return;
     
     // Check saved theme preference or default to light
     const savedTheme = localStorage.getItem('fsh_theme') || 'light';
@@ -96,9 +94,6 @@ function initializeDarkMode() {
     
     // Set initial icon
     updateThemeIcon(themeToggle, savedTheme);
-    
-    // Insert button into DOM
-    document.body.insertBefore(themeToggle, document.body.firstChild);
     
     // Toggle theme function
     themeToggle.addEventListener('click', () => {
@@ -118,16 +113,23 @@ function initializeDarkMode() {
 }
 
 function updateThemeIcon(button, theme) {
+    // Ensure button has an icon element
+    let icon = button.querySelector('i');
+    if (!icon) {
+        icon = document.createElement('i');
+        button.appendChild(icon);
+    }
+
     if (theme === 'dark') {
-        button.innerHTML = '<i class="fas fa-moon"></i>';
+        icon.className = 'fas fa-moon';
     } else {
-        button.innerHTML = '<i class="fas fa-sun"></i>';
+        icon.className = 'fas fa-sun';
     }
 }
 
 // Make functions globally available
 window.toggleSidebar = function() {
-    const menuToggle = document.querySelector('.menu-toggle');
+    const menuToggle = document.getElementById('menu-toggle');
     if (menuToggle) {
         menuToggle.click();
     }
