@@ -207,15 +207,19 @@
         height: 100%;
     }
 
+    /* Desktop sidebar logo */
     .dash-nav img {
         width: 50px;
         height: 50px;
         object-fit: contain;
         margin-bottom: 15px;
+        transition: filter 0.3s ease;
     }
 
     [data-theme="dark"] .dash-nav img {
-        filter: brightness(1.66) saturate(1.1);
+        filter: brightness(1.6) saturate(1.2) 
+                drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) 
+                drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
     }
 
     .nav-right {
@@ -284,15 +288,19 @@
         gap: 20px;
     }
 
+    /* Mobile nav logo */
     .dash-nav img {
         width: 40px;
         height: 40px;
         object-fit: contain;
         margin-bottom: 5px;
+        transition: filter 0.3s ease;
     }
 
     [data-theme="dark"] .dash-nav img {
-        filter: brightness(1.6) saturate(1.1);
+        filter: brightness(1.6) saturate(1.2) 
+                drop-shadow(0 0 6px rgba(255, 255, 255, 0.5)) 
+                drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
     }
 
     .nav-right {
