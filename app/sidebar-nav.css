@@ -44,19 +44,6 @@
     cursor: pointer;
 }
 
-/* Profile icon - smooth transition */
-.profile-link img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: filter 0.3s ease;
-}
-
-/* Make profile icon white in dark mode */
-[data-theme="dark"] .profile-link img {
-    filter: brightness(0) invert(1);
-}
-
 .profile-link:hover {
     transform: scale(1.1);
 }
@@ -74,24 +61,169 @@
     text-align: center;
 }
 
-/* Hamburger Menu Button - UPPER LEFT */
-.menu-toggle {
-    position: static; /* Was fixed */
-    transform: none;  /* Reset any transforms if necessary */
-    margin: 0;        /* Reset margins */
-    
-    /* Keep your existing styling */
+/* Mail/Notifications Button - Top right corner */
+.mail-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1003;
+    background: transparent;
+    border: none;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    border: none;
     cursor: pointer;
-    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
+    padding: 0;
+}
+
+[data-theme="dark"] .mail-button {
+    background: transparent;
+}
+
+.mail-button:hover {
+    transform: scale(1.1);
+}
+
+[data-theme="dark"] .mail-button:hover {
+    transform: scale(1.1);
+}
+
+.mail-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.mail-button i {
+    display: none;
+}
+
+[data-theme="dark"] .mail-button i {
+    display: none;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Theme Toggle in Sidebar */
+.theme-toggle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hover-bg);
+    border: 2px solid var(--text-color);
+    border-radius: 50px;
+    padding: 4px;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.theme-toggle-slider {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    border-radius: 50%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    left: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme="dark"] .theme-toggle-slider {
+    left: calc(100% - 25px);
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+}
+
+.theme-toggle-slider i {
+    font-size: 11px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle-slider i {
+    color: #081316;
+}
+
+.theme-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-color);
+    text-align: center;
+}
+
+
+/* Hamburger Menu Button */
+.menu-toggle {
+    position: fixed;
+    top: 40px;
+    left: 5%;
+    z-index: 1001;
+    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adjust hamburger position on specific pages to avoid overlap */
+body[data-page="laboratory"] .menu-toggle,
+body[data-page="mail"] .menu-toggle,
+body[data-page="profile"] .menu-toggle {
+    top: 20px;
+    left: 20px;
 }
 
 [data-theme="dark"] .menu-toggle {
@@ -117,47 +249,29 @@
     color: #081316;
 }
 
-/* Dark Mode Toggle Button - UPPER RIGHT */
-.theme-toggle {
-    position: static; /* Was fixed */
-    margin: 0;        /* Reset margins */
-    
-    /* Keep your existing styling */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
+/* Hide hamburger menu when sidebar is open */
+.menu-toggle.active {
+    opacity: 0;
+    pointer-events: none;
 }
 
-[data-theme="dark"] .theme-toggle {
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+/* Dark mode glow effects for sidebar logo and profile icon */
+[data-theme="dark"] .dash-nav img[src*="fsh_logo"] {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
 }
 
-.theme-toggle:hover {
-    transform: scale(1.05);
-    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.4);
+[data-theme="dark"] .profile-link img {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
-.theme-toggle i {
-    color: #081316;
-    font-size: 24px;
-    transition: all 0.3s ease;
-}
-
-[data-theme="dark"] .theme-toggle i {
-    color: #ffd700;
+[data-theme="dark"] .mail-button img {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
 .tab-text {
     display: none;
 }
+
 
 /* Sidebar Overlay */
 .sidebar-overlay {
@@ -208,19 +322,12 @@
         height: 100%;
     }
 
-    /* Desktop sidebar logo */
-    .dash-nav img {
+    .dash-nav img[src*="fsh_logo"] {
         width: 50px;
         height: 50px;
         object-fit: contain;
         margin-bottom: 15px;
-        transition: filter 0.3s ease;
-    }
-
-    [data-theme="dark"] .dash-nav img {
-        filter: brightness(1.6) saturate(1.2) 
-                drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) 
-                drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+        content: url('../public/fsh_logo_colored.png');
     }
 
     .nav-right {
@@ -260,6 +367,19 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
+    .menu-toggle {
+        top: 30px;
+        left: 5%;
+    }
+    
+    /* Adjust for specific pages on mobile */
+    body[data-page="laboratory"] .menu-toggle,
+    body[data-page="mail"] .menu-toggle,
+    body[data-page="profile"] .menu-toggle {
+        top: 15px;
+        left: 15px;
+    }
+    
     .dash-nav {
         background-color: var(--nav-bg);
         position: fixed;
@@ -289,19 +409,12 @@
         gap: 20px;
     }
 
-    /* Mobile nav logo */
-    .dash-nav img {
+    .dash-nav img[src*="fsh_logo"] {
         width: 40px;
         height: 40px;
         object-fit: contain;
         margin-bottom: 5px;
-        transition: filter 0.3s ease;
-    }
-
-    [data-theme="dark"] .dash-nav img {
-        filter: brightness(1.6) saturate(1.2) 
-                drop-shadow(0 0 6px rgba(255, 255, 255, 0.5)) 
-                drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        content: url('../public/fsh_logo_colored.png');
     }
 
     .nav-right {
@@ -335,43 +448,4 @@
 /* Prevent scrolling when menu is open */
 body.menu-open {
     overflow: hidden;
-}
-
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Pushes theme toggle to the far right */
-    width: 100%;
-    margin-bottom: 30px;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* Space between Hamburger and Dashboard text */
-}
-
-/* Remove default margin from H1 since the header container handles spacing */
-.main-content h1 {
-    margin-bottom: 0; 
-}
-
-.menu-toggle:hover, .theme-toggle:hover {
-    transform: scale(1.05);
-}
-
-/* Mobile Responsiveness for the new header */
-@media screen and (max-width: 768px) {
-    .dashboard-header {
-        margin-bottom: 20px;
-    }
-    
-    .menu-toggle, .theme-toggle {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .menu-toggle i, .theme-toggle i {
-        font-size: 18px;
-    }
 }

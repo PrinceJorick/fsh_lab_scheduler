@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mail - FSH Lab Scheduler</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=0.8">
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="sidebar-nav.css">
+        <link rel="stylesheet" href="mail-styles.css">
+        <meta name="description" content="">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </head>
+    <body>
+        <div class="dashboard-container">
+            <header class="dash-nav">
+                <nav>
+                    <a href="dashboard.html"><img src="../public/fsh_logo_colored.png"></a>
+                    <div class="nav-right">
+                        <p id="user-display"></p>
+                        <div class="profile-section">
+                            <a href="profile.html" class="profile-link" title="Profile">
+                                <img src="../public/User_Circle.png" alt="Profile">
+                            </a>
+                            <span class="profile-label">Profile</span>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <div class="mail-header">
+                <div class="mail-header-content">
+                    <div class="mail-header-left">
+                        <h1><i class="fas fa-envelope"></i> Notifications</h1>
+                        <p id="mail-subtitle">Your messages and updates</p>
+                    </div>
+                    <div class="mail-header-right">
+                        <button class="back-btn" onclick="goBackToDashboard()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Dashboard</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <main class="main-content">
+                <div class="mail-container">
+                    <!-- Filter Tabs -->
+                    <div class="mail-tabs">
+                        <button class="mail-tab active" onclick="filterMessages('all')" data-filter="all">
+                            <i class="fas fa-inbox"></i>
+                            <span>All</span>
+                            <span class="tab-count" id="count-all">0</span>
+                        </button>
+                        <button class="mail-tab" onclick="filterMessages('unread')" data-filter="unread">
+                            <i class="fas fa-envelope"></i>
+                            <span>Unread</span>
+                            <span class="tab-count" id="count-unread">0</span>
+                        </button>
+                        <button class="mail-tab" onclick="filterMessages('approved')" data-filter="approved">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Approved</span>
+                            <span class="tab-count" id="count-approved">0</span>
+                        </button>
+                        <button class="mail-tab" onclick="filterMessages('pending')" data-filter="pending">
+                            <i class="fas fa-clock"></i>
+                            <span>Pending</span>
+                            <span class="tab-count" id="count-pending">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Messages List -->
+                    <div class="messages-list" id="messages-list">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Message Detail Modal -->
+        <div id="message-modal" class="modal">
+            <div class="modal-content message-modal-content">
+                <div class="modal-header">
+                    <h2>Notification Details</h2>
+                    <button class="modal-close" onclick="closeMessageModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="message-detail" id="message-detail">
+                    <!-- Message details will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <script src="sidebar-nav.js"></script>
+        <script src="ui.js"></script>
+        <script src="notifications.js"></script>
+        <script src="mail.js"></script>
+    </body>
+</html>

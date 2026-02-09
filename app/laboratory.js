@@ -11,16 +11,16 @@ let currentLab = '';
 
 // Time slots available for reservation
 const TIME_SLOTS = [
-    '07:00 - 08:00',
-    '08:00 - 09:00',
-    '09:00 - 10:00',
-    '10:00 - 11:00',
-    '11:00 - 12:00',
-    '13:00 - 14:00',
-    '14:00 - 15:00',
-    '15:00 - 16:00',
-    '16:00 - 17:00',
-    '17:00 - 18:00'
+    '07:00 AM - 08:00 AM',
+    '08:00 AM - 09:00 AM',
+    '09:00 AM - 10:00 AM',
+    '10:00 AM - 11:00 AM',
+    '11:00 AM - 12:00 PM',
+    '01:00 PM - 02:00 PM',
+    '02:00 PM - 03:00 PM',
+    '03:00 PM - 04:00 PM',
+    '04:00 PM - 05:00 PM',
+    '05:00 PM - 06:00 PM'
 ];
 
 // ============================================================================
@@ -60,6 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Render calendar
     renderCalendar();
+    
+    // Check if coming from mail with specific date/time
+    const fromMail = urlParams.get('fromMail');
+    const targetDate = urlParams.get('date');
+    const targetTimeSlot = urlParams.get('timeSlot');
+    
+    if (fromMail === 'true' && targetDate) {
+        // Wait for calendar to render, then highlight the date
+        setTimeout(() => {
+            highlightDateFromMail(targetDate, targetTimeSlot);
+        }, 300);
+    }
 });
 
 // ============================================================================
@@ -90,8 +102,20 @@ function renderTimeSlots() {
     TIME_SLOTS.forEach(slot => {
         const slotElement = document.createElement('div');
         slotElement.className = 'time-slot';
-        slotElement.textContent = slot;
-        slotElement.onclick = () => selectTimeSlot(slot, slotElement);
+        
+        // Check if slot is reserved for selected date
+        const isReserved = selectedDate && isSlotReserved(selectedDate, slot);
+        
+        if (isReserved) {
+            slotElement.classList.add('reserved');
+            slotElement.innerHTML = `${slot} <span style="font-size: 11px; color: #ef4444;">(Reserved)</span>`;
+            slotElement.style.cursor = 'not-allowed';
+            slotElement.style.opacity = '0.6';
+        } else {
+            slotElement.textContent = slot;
+            slotElement.onclick = () => selectTimeSlot(slot, slotElement);
+        }
+        
         container.appendChild(slotElement);
     });
 }
@@ -104,7 +128,7 @@ function selectTimeSlot(slot, element) {
     
     // Check if slot is available
     if (isSlotReserved(selectedDate, slot)) {
-        alert('This time slot is already reserved');
+        alert('This time slot is already reserved. Please choose another time slot.');
         return;
     }
     
@@ -129,6 +153,16 @@ function handleReservationSubmit(e) {
         return;
     }
     
+    // Final check for conflicts
+    if (isSlotReserved(selectedDate, selectedTimeSlot)) {
+        alert('This time slot has just been reserved by someone else. Please select a different time slot.');
+        // Refresh time slots
+        renderTimeSlots();
+        selectedTimeSlot = null;
+        updateFormState();
+        return;
+    }
+    
     const email = localStorage.getItem('fsh_user_email');
     const formData = {
         id: Date.now().toString(),
@@ -147,11 +181,13 @@ function handleReservationSubmit(e) {
     // Save reservation
     saveReservation(formData);
 
-    // Send notification to admin
-    sendAdminNotification(formData);
+    // Send notification to admin (using the notifications.js function)
+    if (typeof window.sendAdminNotification === 'function') {
+        window.sendAdminNotification(formData);
+    }
 
     // Show success message
-    alert('Reservation submitted successfully! Waiting for admin approval.');
+    alert('✅ Reservation submitted successfully!\n\nYour request has been sent to the administrator for approval. You will be notified once it has been reviewed.');
     
     // Reset form
     resetReservationForm();
@@ -268,7 +304,7 @@ function createReservationItem(reservation) {
 }
 
 function approveReservation(id) {
-    if (!confirm('Approve this reservation?')) return;
+    if (!confirm('✅ Approve this reservation?')) return;
     
     const reservations = getAllReservations();
     const index = reservations.findIndex(r => r.id === id);
@@ -276,14 +312,23 @@ function approveReservation(id) {
     if (index !== -1) {
         reservations[index].status = 'approved';
         localStorage.setItem('fsh_reservations', JSON.stringify(reservations));
+        
+        // Update all related notifications
+        updateAllNotificationsForReservation(id, 'approved');
+        
+        // Send notification to teacher (using the notifications.js function)
+        if (typeof window.sendApprovalNotification === 'function') {
+            window.sendApprovalNotification(reservations[index], true);
+        }
+        
         renderReservationsList();
         renderCalendar();
-        alert('Reservation approved!');
+        alert('✅ Reservation approved!\n\nThe teacher has been notified.');
     }
 }
 
 function declineReservation(id) {
-    if (!confirm('Decline this reservation?')) return;
+    if (!confirm('❌ Decline this reservation?')) return;
     
     const reservations = getAllReservations();
     const index = reservations.findIndex(r => r.id === id);
@@ -291,9 +336,42 @@ function declineReservation(id) {
     if (index !== -1) {
         reservations[index].status = 'declined';
         localStorage.setItem('fsh_reservations', JSON.stringify(reservations));
+        
+        // Update all related notifications (use 'rejected' for notifications)
+        updateAllNotificationsForReservation(id, 'rejected');
+        
+        // Send notification to teacher (using the notifications.js function)
+        if (typeof window.sendApprovalNotification === 'function') {
+            // For notification purposes, use 'rejected' status
+            const notifData = {...reservations[index], status: 'rejected'};
+            window.sendApprovalNotification(notifData, false);
+        }
+        
         renderReservationsList();
         renderCalendar();
-        alert('Reservation declined.');
+        alert('❌ Reservation declined.\n\nThe teacher has been notified.');
+    }
+}
+
+function updateAllNotificationsForReservation(reservationId, newStatus) {
+    // Get all notifications from localStorage
+    const notificationsData = localStorage.getItem('fsh_notifications');
+    if (!notificationsData) return;
+    
+    const notifications = JSON.parse(notificationsData);
+    let updated = false;
+    
+    // Update all request-type notifications for this reservation
+    notifications.forEach(notification => {
+        if (notification.reservationId === reservationId && notification.type === 'request') {
+            notification.status = newStatus;
+            updated = true;
+        }
+    });
+    
+    // Save if any updates were made
+    if (updated) {
+        localStorage.setItem('fsh_notifications', JSON.stringify(notifications));
     }
 }
 
@@ -379,8 +457,11 @@ function selectDate(date, element) {
     element.classList.add('selected');
     selectedDate = date;
     
-    // Update time slots availability
-    updateTimeSlotAvailability();
+    // Clear time slot selection
+    selectedTimeSlot = null;
+    
+    // Re-render time slots to show availability
+    renderTimeSlots();
     
     // Update form state
     updateFormState();
@@ -450,7 +531,7 @@ function isSlotReserved(date, timeSlot) {
         r.date === date && 
         r.timeSlot === timeSlot && 
         r.lab === currentLab && 
-        r.status === 'approved'
+        (r.status === 'approved' || r.status === 'pending')
     );
 }
 
@@ -472,46 +553,54 @@ function goBackToDashboard() {
     window.location.href = 'dashboard.html';
 }
 
-// ============================================================================
-// NOTIFICATIONS
-// ============================================================================
-
-function sendAdminNotification(reservationData) {
-    // Create notification object
-    const notification = {
-        id: Date.now().toString(),
-        type: 'new_reservation',
-        title: 'New Reservation Request',
-        message: `${reservationData.requester.split('@')[0]} requested ${reservationData.lab} for ${formatDate(reservationData.date)} at ${reservationData.timeSlot}`,
-        reservationId: reservationData.id,
-        read: false,
-        timestamp: new Date().toISOString()
-    };
+function highlightDateFromMail(dateString, timeSlot) {
+    // Parse the date to set the correct month/year
+    const targetDate = new Date(dateString);
+    currentMonth = targetDate.getMonth();
+    currentYear = targetDate.getFullYear();
     
-    // Get existing notifications
-    const notifications = getAdminNotifications();
+    // Re-render calendar with the correct month
+    renderCalendar();
     
-    // Add new notification at the beginning
-    notifications.unshift(notification);
-    
-    // Save to localStorage
-    localStorage.setItem('fsh_admin_notifications', JSON.stringify(notifications));
-    
-    // Update notification badge count
-    updateNotificationBadge();
-}
-
-function getAdminNotifications() {
-    const data = localStorage.getItem('fsh_admin_notifications');
-    return data ? JSON.parse(data) : [];
-}
-
-function updateNotificationBadge() {
-    const notifications = getAdminNotifications();
-    const unreadCount = notifications.filter(n => !n.read).length;
-    
-    // Store unread count
-    localStorage.setItem('fsh_unread_notifications', unreadCount.toString());
+    // Wait a bit for calendar to render
+    setTimeout(() => {
+        // Find and click the date
+        const calendarDays = document.querySelectorAll('.calendar-day');
+        calendarDays.forEach(day => {
+            const dayNum = parseInt(day.textContent);
+            if (dayNum === targetDate.getDate() && !day.classList.contains('empty')) {
+                day.click();
+                
+                // Scroll to the date
+                day.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Add a visual highlight
+                day.style.boxShadow = '0 0 0 3px #081316, 0 0 20px rgba(8, 19, 22, 0.5)';
+                setTimeout(() => {
+                    day.style.boxShadow = '';
+                }, 3000);
+            }
+        });
+        
+        // Highlight the time slot if provided
+        if (timeSlot) {
+            setTimeout(() => {
+                const timeSlots = document.querySelectorAll('.time-slot');
+                timeSlots.forEach(slot => {
+                    if (slot.textContent.includes(timeSlot)) {
+                        // Scroll to the time slot
+                        slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Add a visual highlight
+                        slot.style.boxShadow = '0 0 0 3px #081316, 0 0 20px rgba(8, 19, 22, 0.5)';
+                        setTimeout(() => {
+                            slot.style.boxShadow = '';
+                        }, 3000);
+                    }
+                });
+            }, 500);
+        }
+    }, 100);
 }
 
 // Make functions globally available
@@ -520,3 +609,4 @@ window.nextMonth = nextMonth;
 window.approveReservation = approveReservation;
 window.declineReservation = declineReservation;
 window.goBackToDashboard = goBackToDashboard;
+window.highlightDateFromMail = highlightDateFromMail;

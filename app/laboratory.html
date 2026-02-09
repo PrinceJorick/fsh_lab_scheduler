@@ -15,7 +15,7 @@
         <div class="dashboard-container">
             <header class="dash-nav">
                 <nav>
-                    <a href="dashboard.html"><img src="../public/fsh_logo.png"></a>
+                    <a href="dashboard.html"><img src="../public/fsh_logo_colored.png"></a>
                     <div class="nav-right">
                         <p id="user-display"></p>
                         <div class="profile-section">
@@ -80,7 +80,13 @@
                         <form id="reservation-form">
                             <div class="form-group">
                                 <label for="subject">Subject</label>
-                                <input type="text" id="subject" required placeholder="e.g., General Biology">
+                                <select id="subject" required>
+                                    <option value="">Select subject</option>
+                                    <option value="General Biology">General Biology</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="E-Tech">E-Tech</option>
+                                </select>
                             </div>
 
                             <div class="form-group">
@@ -138,6 +144,7 @@
         </div>
 
         <script src="sidebar-nav.js"></script>
+        <script src="notifications.js"></script>
         <script src="ui.js"></script>
         <script>
             // Get lab name from URL and update page

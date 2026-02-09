@@ -14,7 +14,7 @@
     </head>
     <body>
         <nav>
-            <img src="../public/fsh_logo.png">
+            <img src="../public/fsh_logo_colored.png">
         </nav>
 
         <div class="main-container">
@@ -187,5 +187,12 @@
         <script src="auth.js"></script>
         <script src="ui.js"></script>
         <script src="google-auth.js"></script>
+        <script>
+            // Initialize dark mode on login page
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedTheme = localStorage.getItem('fsh_theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            });
+        </script>
     </body>
 </html>

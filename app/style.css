@@ -77,17 +77,10 @@ nav {
     padding: 30px 3%;
 }
 
-/* Main navigation logo (line ~96) */
-nav img{
+nav img[src*="fsh_logo"] {
     width: 50px;
     height: 50px;
-    transition: filter 0.3s ease;
-}
-
-[data-theme="dark"] nav img {
-    filter: brightness(1.6) saturate(1.2) 
-            drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) 
-            drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+    content: url('../public/fsh_logo_colored.png');
 }
 
 /* ============================================================================
@@ -452,33 +445,15 @@ nav img{
     padding: 0;
 }
 
-/* Dashboard navigation logo (line ~388) */
 .dash-nav img {
     width: 50px;
     height: 50px;
     object-fit: contain;
-    transition: filter 0.3s ease;
-}
-
-[data-theme="dark"] .dash-nav img {
-    filter: brightness(1.6) saturate(1.2) 
-            drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) 
-            drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
 }
 
 #user-display {
     font-size: clamp(14px, 2vw, 18px);
     font-weight: 500;
-}
-
-/* Profile icon styling */
-.profile-link img {
-    transition: filter 0.3s ease;
-}
-
-/* Make profile icon white in dark mode */
-[data-theme="dark"] .profile-link img {
-    filter: brightness(0) invert(1);
 }
 
 /* ============================================================================
