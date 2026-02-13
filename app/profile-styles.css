@@ -10,6 +10,13 @@
     margin-bottom: 0;
 }
 
+/* Add extra left padding on desktop to account for hamburger menu */
+@media (min-width: 769px) {
+    .profile-header {
+        padding-left: calc(60px + 44px + 20px); /* hamburger position + width + gap */
+    }
+}
+
 [data-theme="dark"] .profile-header {
     background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
 }

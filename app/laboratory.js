@@ -5,6 +5,9 @@
 // Global state
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
+let currentDay = new Date();
+let currentWeekStart = null;
+let calendarView = 'monthly'; // 'daily', 'weekly', 'monthly'
 let selectedDate = null;
 let selectedTimeSlot = null;
 let currentLab = '';
@@ -82,6 +85,30 @@ function initializeUserView() {
     // Show user sections
     document.getElementById('user-view')?.classList.remove('hidden');
     document.getElementById('admin-view')?.classList.add('hidden');
+    
+    // Update calendar title
+    const calendarTitle = document.getElementById('calendar-title');
+    if (calendarTitle) {
+        calendarTitle.textContent = 'Select Date';
+    }
+    
+    // Show the subtitle for teachers
+    const labSubtitle = document.getElementById('lab-subtitle');
+    if (labSubtitle) {
+        labSubtitle.style.display = 'block';
+    }
+    
+    // Show user calendar controls
+    const userControls = document.getElementById('user-calendar-controls');
+    if (userControls) {
+        userControls.style.display = 'flex';
+    }
+    
+    // Hide admin calendar controls
+    const adminControls = document.getElementById('admin-calendar-controls');
+    if (adminControls) {
+        adminControls.style.display = 'none';
+    }
     
     // Setup time slot selection
     renderTimeSlots();
@@ -169,6 +196,7 @@ function handleReservationSubmit(e) {
         lab: currentLab,
         date: selectedDate,
         timeSlot: selectedTimeSlot,
+        teacherName: document.getElementById('teacher-name').value,
         subject: document.getElementById('subject').value,
         grade: document.getElementById('grade').value,
         students: document.getElementById('students').value,
@@ -240,6 +268,56 @@ function initializeAdminView() {
     document.getElementById('user-view')?.classList.add('hidden');
     document.getElementById('admin-view')?.classList.remove('hidden');
     
+    // Update calendar title
+    const calendarTitle = document.getElementById('calendar-title');
+    if (calendarTitle) {
+        calendarTitle.textContent = 'Calendar Overview';
+    }
+    
+    // Hide the subtitle for admins
+    const labSubtitle = document.getElementById('lab-subtitle');
+    if (labSubtitle) {
+        labSubtitle.style.display = 'none';
+    }
+    
+    // Hide user calendar controls (view toggle buttons)
+    const userControls = document.getElementById('user-calendar-controls');
+    if (userControls) {
+        userControls.style.display = 'none';
+    }
+    
+    // Show admin calendar controls (just navigation)
+    const adminControls = document.getElementById('admin-calendar-controls');
+    if (adminControls) {
+        adminControls.style.display = 'flex';
+    }
+    
+    // Add instruction banner for admins
+    const calendarContainer = document.querySelector('.calendar-container');
+    if (calendarContainer) {
+        let instructionBanner = document.getElementById('admin-calendar-instruction');
+        if (!instructionBanner) {
+            instructionBanner = document.createElement('div');
+            instructionBanner.id = 'admin-calendar-instruction';
+            instructionBanner.style.cssText = `
+                background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                margin-bottom: 15px;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            instructionBanner.innerHTML = `
+                <i class="fas fa-info-circle" style="font-size: 18px;"></i>
+                <span>Click on any date (including past dates) to view reservations for that day</span>
+            `;
+            calendarContainer.insertBefore(instructionBanner, calendarContainer.querySelector('.calendar-header').nextSibling);
+        }
+    }
+    
     renderReservationsList();
 }
 
@@ -274,12 +352,13 @@ function createReservationItem(reservation) {
     div.className = `reservation-item ${reservation.status}`;
     
     const userName = reservation.requester.split('@')[0];
+    const teacherName = reservation.teacherName || userName; // Use teacher name if available, fallback to email username
     const statusBadge = `<span class="reservation-status ${reservation.status}">${reservation.status}</span>`;
     
     div.innerHTML = `
         <div class="reservation-header">
             <div class="reservation-info">
-                <h4>${userName}</h4>
+                <h4>${teacherName}</h4>
                 <p><i class="far fa-calendar"></i> ${formatDate(reservation.date)}</p>
                 <p><i class="far fa-clock"></i> ${reservation.timeSlot}</p>
                 <p><i class="fas fa-book"></i> ${reservation.subject} - Grade ${reservation.grade}</p>
@@ -380,18 +459,38 @@ function updateAllNotificationsForReservation(reservationId, newStatus) {
 // ============================================================================
 
 function renderCalendar() {
+    if (calendarView === 'daily') {
+        renderDailyView();
+    } else if (calendarView === 'weekly') {
+        renderWeeklyView();
+    } else {
+        renderMonthlyView();
+    }
+}
+
+// ============================================================================
+// MONTHLY VIEW (Original)
+// ============================================================================
+
+function renderMonthlyView() {
     const calendarGrid = document.getElementById('calendar-grid');
     const monthYear = document.getElementById('current-month-year');
+    const adminMonthYear = document.getElementById('admin-month-year');
     
-    if (!calendarGrid || !monthYear) return;
+    if (!calendarGrid) return;
     
     // Update month/year display
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
-    monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    const displayText = `${monthNames[currentMonth]} ${currentYear}`;
     
-    // Clear calendar
+    // Update both displays (user and admin)
+    if (monthYear) monthYear.textContent = displayText;
+    if (adminMonthYear) adminMonthYear.textContent = displayText;
+    
+    // Clear calendar and reset grid
     calendarGrid.innerHTML = '';
+    calendarGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
     
     // Add day headers
     const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -419,12 +518,14 @@ function renderCalendar() {
         const dayElement = document.createElement('div');
         const date = new Date(currentYear, currentMonth, day);
         const dateString = formatDateForStorage(date);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
         
         dayElement.className = 'calendar-day';
         dayElement.textContent = day;
         
         // Mark past days
-        if (date < today.setHours(0, 0, 0, 0)) {
+        if (date < todayDate) {
             dayElement.classList.add('past');
         }
         
@@ -438,13 +539,203 @@ function renderCalendar() {
             dayElement.classList.add('has-reservation');
         }
         
-        // Add click handler for future dates
-        if (date >= today.setHours(0, 0, 0, 0)) {
+        // Add click handler
+        const role = localStorage.getItem('fsh_user_role');
+        if (role === 'Admin') {
+            // Admin can click ANY date (including past dates) to see reservations
+            dayElement.onclick = () => selectDateAdmin(dateString, dayElement);
+            dayElement.style.cursor = 'pointer';
+            // Add subtle hover effect for admin
+            dayElement.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.backgroundColor = 'var(--hover-bg)';
+                }
+            });
+            dayElement.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.backgroundColor = '';
+                }
+            });
+        } else if (date >= todayDate) {
+            // Teachers can only click future dates
             dayElement.onclick = () => selectDate(dateString, dayElement);
         }
         
         calendarGrid.appendChild(dayElement);
     }
+}
+
+// ============================================================================
+// WEEKLY VIEW
+// ============================================================================
+
+function renderWeeklyView() {
+    const calendarGrid = document.getElementById('calendar-grid');
+    const monthYear = document.getElementById('current-month-year');
+    const adminMonthYear = document.getElementById('admin-month-year');
+    
+    if (!calendarGrid) return;
+    
+    if (!currentWeekStart) {
+        currentWeekStart = getWeekStart(new Date());
+    }
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    // Display week range
+    const displayText = `${monthNames[currentWeekStart.getMonth()]} ${currentWeekStart.getDate()} - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${currentWeekStart.getFullYear()}`;
+    
+    // Update both displays (user and admin)
+    if (monthYear) monthYear.textContent = displayText;
+    if (adminMonthYear) adminMonthYear.textContent = displayText;
+    
+    // Clear calendar and reset grid
+    calendarGrid.innerHTML = '';
+    calendarGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+    
+    // Add day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        const header = document.createElement('div');
+        header.className = 'calendar-day-header';
+        header.textContent = day;
+        calendarGrid.appendChild(header);
+    });
+    
+    const today = new Date();
+    
+    // Add 7 days of the week
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(currentWeekStart);
+        date.setDate(date.getDate() + i);
+        const dateString = formatDateForStorage(date);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = date.getDate();
+        
+        if (date < todayDate) {
+            dayElement.classList.add('past');
+        }
+        
+        if (date.toDateString() === new Date().toDateString()) {
+            dayElement.classList.add('today');
+        }
+        
+        if (hasReservations(dateString)) {
+            dayElement.classList.add('has-reservation');
+        }
+        
+        const role = localStorage.getItem('fsh_user_role');
+        if (role === 'Admin') {
+            // Admin can click ANY date to see reservations
+            dayElement.onclick = () => selectDateAdmin(dateString, dayElement);
+            dayElement.style.cursor = 'pointer';
+            // Add subtle hover effect for admin
+            dayElement.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.backgroundColor = 'var(--hover-bg)';
+                }
+            });
+            dayElement.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.backgroundColor = '';
+                }
+            });
+        } else if (date >= todayDate) {
+            // Teachers can only click future dates
+            dayElement.onclick = () => selectDate(dateString, dayElement);
+        }
+        
+        calendarGrid.appendChild(dayElement);
+    }
+}
+
+// ============================================================================
+// DAILY VIEW
+// ============================================================================
+
+function renderDailyView() {
+    const calendarGrid = document.getElementById('calendar-grid');
+    const monthYear = document.getElementById('current-month-year');
+    const adminMonthYear = document.getElementById('admin-month-year');
+    
+    if (!calendarGrid) return;
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    const displayText = `${dayNames[currentDay.getDay()]}, ${monthNames[currentDay.getMonth()]} ${currentDay.getDate()}, ${currentDay.getFullYear()}`;
+    
+    // Update both displays (user and admin)
+    if (monthYear) monthYear.textContent = displayText;
+    if (adminMonthYear) adminMonthYear.textContent = displayText;
+    
+    // Clear calendar and change grid layout
+    calendarGrid.innerHTML = '';
+    calendarGrid.style.gridTemplateColumns = '1fr';
+    
+    const dateString = formatDateForStorage(currentDay);
+    const today = new Date();
+    
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day daily-view';
+    dayElement.innerHTML = `
+        <div class="daily-date">
+            <div class="daily-day-name">${dayNames[currentDay.getDay()]}</div>
+            <div class="daily-day-number">${currentDay.getDate()}</div>
+            <div class="daily-month-year">${monthNames[currentDay.getMonth()]} ${currentDay.getFullYear()}</div>
+        </div>
+    `;
+    
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    
+    if (currentDay < todayDate) {
+        dayElement.classList.add('past');
+    }
+    
+    if (currentDay.toDateString() === new Date().toDateString()) {
+        dayElement.classList.add('today');
+    }
+    
+    if (hasReservations(dateString)) {
+        dayElement.classList.add('has-reservation');
+    }
+    
+    const role = localStorage.getItem('fsh_user_role');
+    if (role === 'Admin') {
+        // Admin can view reservations for ANY date (including past dates)
+        dayElement.classList.add('selected');
+        selectedDate = dateString;
+        dayElement.onclick = () => selectDateAdmin(dateString, dayElement);
+        dayElement.style.cursor = 'pointer';
+        
+        // Show reservations for this date
+        renderReservationsForDate(dateString);
+    } else if (currentDay >= todayDate) {
+        // Teacher view - only future dates
+        dayElement.classList.add('selected');
+        selectedDate = dateString;
+        dayElement.onclick = () => {
+            selectedDate = dateString;
+            renderTimeSlots();
+            updateFormState();
+        };
+        
+        // Auto-select and show time slots
+        renderTimeSlots();
+        updateFormState();
+    }
+    
+    calendarGrid.appendChild(dayElement);
 }
 
 function selectDate(date, element) {
@@ -467,6 +758,173 @@ function selectDate(date, element) {
     updateFormState();
 }
 
+// Admin date selection - shows all reservations for that date
+function selectDateAdmin(date, element) {
+    console.log('Admin clicked date:', date);
+    console.log('Current lab:', currentLab);
+    
+    // Remove previous selection from all calendar grids and clear any inline styles
+    document.querySelectorAll('.calendar-day').forEach(el => {
+        el.classList.remove('selected');
+        el.style.backgroundColor = ''; // Clear any inline background color
+        el.style.transform = ''; // Clear any transform
+    });
+    
+    // Select new date with visual feedback
+    element.classList.add('selected');
+    selectedDate = date;
+    
+    // Add a subtle animation to confirm selection
+    element.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        element.style.transform = '';
+    }, 150);
+    
+    // Show all reservations for this date
+    console.log('Calling renderReservationsForDate...');
+    renderReservationsForDate(date);
+    
+    // Scroll to reservations list smoothly
+    const reservationsList = document.getElementById('reservations-list');
+    console.log('Reservations list element:', reservationsList);
+    if (reservationsList) {
+        setTimeout(() => {
+            reservationsList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 200);
+    }
+}
+
+// Render reservations filtered by date
+function renderReservationsForDate(dateString) {
+    console.log('renderReservationsForDate called with:', dateString);
+    const container = document.getElementById('reservations-list');
+    console.log('Container element:', container);
+    
+    if (!container) {
+        console.error('reservations-list container not found!');
+        return;
+    }
+    
+    const allReservations = getAllReservations()
+        .filter(r => r.lab === currentLab && r.date === dateString)
+        .sort((a, b) => {
+            // Sort by status (pending first), then by time slot
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            return a.timeSlot.localeCompare(b.timeSlot);
+        });
+    
+    console.log('Filtered reservations:', allReservations);
+    
+    const formattedDate = formatDate(dateString);
+    
+    if (allReservations.length === 0) {
+        container.innerHTML = `
+            <div style="margin-bottom: 20px; padding: 15px; background: var(--hover-bg); border-radius: 10px; border-left: 4px solid #081316;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <h3 style="margin: 0 0 5px 0; color: var(--text-color); font-size: 16px;">
+                            <i class="fas fa-calendar-day"></i> ${formattedDate}
+                        </h3>
+                        <p style="margin: 0; color: var(--secondary-text); font-size: 13px;">
+                            ${currentLab}
+                        </p>
+                    </div>
+                    <button onclick="renderReservationsList()" style="
+                        background: #081316;
+                        color: white;
+                        border: 2px solid #081316;
+                        padding: 10px 20px;
+                        border-radius: 50px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        transition: all 0.3s ease;
+                        flex-shrink: 0;
+                    " onmouseover="this.style.background='transparent'; this.style.color='#081316';" 
+                       onmouseout="this.style.background='#081316'; this.style.color='white';">
+                        <i class="fas fa-list"></i> View All Reservations
+                    </button>
+                </div>
+            </div>
+            <div class="empty-state">
+                <i class="fas fa-calendar-check" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px; color: var(--secondary-text);"></i>
+                <p style="font-size: 16px; color: var(--secondary-text); margin: 0;">No reservations for this date</p>
+            </div>
+        `;
+        console.log('No reservations found, empty state displayed');
+        return;
+    }
+    
+    // Header with date info and summary
+    const pendingCount = allReservations.filter(r => r.status === 'pending').length;
+    const approvedCount = allReservations.filter(r => r.status === 'approved').length;
+    const declinedCount = allReservations.filter(r => r.status === 'declined').length;
+    
+    console.log('Rendering header with counts - Pending:', pendingCount, 'Approved:', approvedCount, 'Declined:', declinedCount);
+    
+    container.innerHTML = `
+        <div style="margin-bottom: 25px; padding: 20px; background: var(--hover-bg); border-radius: 15px; border-left: 4px solid #081316;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <h3 style="margin: 0 0 5px 0; color: var(--text-color); font-size: 18px;">
+                        <i class="fas fa-calendar-day"></i> ${formattedDate}
+                    </h3>
+                    <p style="margin: 0; color: var(--secondary-text); font-size: 14px;">
+                        ${currentLab} • ${allReservations.length} reservation${allReservations.length !== 1 ? 's' : ''}
+                    </p>
+                </div>
+                <button onclick="renderReservationsList()" style="
+                    background: #081316;
+                    color: white;
+                    border: 2px solid #081316;
+                    padding: 10px 20px;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s ease;
+                    flex-shrink: 0;
+                " onmouseover="this.style.background='transparent'; this.style.color='#081316';" 
+                   onmouseout="this.style.background='#081316'; this.style.color='white';">
+                    <i class="fas fa-list"></i> View All
+                </button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                ${pendingCount > 0 ? `
+                    <div style="padding: 8px 16px; background: #f59e0b; color: white; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                        <i class="fas fa-clock"></i> ${pendingCount} Pending
+                    </div>
+                ` : ''}
+                ${approvedCount > 0 ? `
+                    <div style="padding: 8px 16px; background: #22c55e; color: white; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                        <i class="fas fa-check"></i> ${approvedCount} Approved
+                    </div>
+                ` : ''}
+                ${declinedCount > 0 ? `
+                    <div style="padding: 8px 16px; background: #ef4444; color: white; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                        <i class="fas fa-times"></i> ${declinedCount} Declined
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    allReservations.forEach(reservation => {
+        const item = createReservationItem(reservation);
+        container.appendChild(item);
+    });
+    
+    console.log('Finished rendering', allReservations.length, 'reservations');
+}
+
 function updateTimeSlotAvailability() {
     if (!selectedDate) return;
     
@@ -484,21 +942,42 @@ function updateTimeSlotAvailability() {
 }
 
 function previousMonth() {
-    currentMonth--;
-    if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
+    if (calendarView === 'daily') {
+        currentDay.setDate(currentDay.getDate() - 1);
+    } else if (calendarView === 'weekly') {
+        if (!currentWeekStart) currentWeekStart = getWeekStart(new Date());
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    } else {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
     }
     renderCalendar();
 }
 
 function nextMonth() {
-    currentMonth++;
-    if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
+    if (calendarView === 'daily') {
+        currentDay.setDate(currentDay.getDate() + 1);
+    } else if (calendarView === 'weekly') {
+        if (!currentWeekStart) currentWeekStart = getWeekStart(new Date());
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    } else {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
     }
     renderCalendar();
+}
+
+function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    return new Date(d.setDate(diff));
 }
 
 // ============================================================================
@@ -518,11 +997,22 @@ function getAllReservations() {
 
 function hasReservations(date) {
     const reservations = getAllReservations();
-    return reservations.some(r => 
-        r.date === date && 
-        r.lab === currentLab && 
-        r.status === 'approved'
-    );
+    const role = localStorage.getItem('fsh_user_role');
+    
+    if (role === 'Admin') {
+        // Admin sees indicator for ANY reservation (pending, approved, or declined)
+        return reservations.some(r => 
+            r.date === date && 
+            r.lab === currentLab
+        );
+    } else {
+        // Teachers only see indicator for approved reservations
+        return reservations.some(r => 
+            r.date === date && 
+            r.lab === currentLab && 
+            r.status === 'approved'
+        );
+    }
 }
 
 function isSlotReserved(date, timeSlot) {
@@ -546,7 +1036,11 @@ function formatDate(dateString) {
 }
 
 function formatDateForStorage(date) {
-    return date.toISOString().split('T')[0];
+    // Use local date components to avoid timezone conversion issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function goBackToDashboard() {
@@ -603,10 +1097,39 @@ function highlightDateFromMail(dateString, timeSlot) {
     }, 100);
 }
 
+// Calendar view toggle
+function showCalendarView(view) {
+    console.log('Calendar view changed to:', view);
+    
+    // Update calendar view state
+    calendarView = view;
+    
+    // Initialize view-specific states
+    if (view === 'weekly' && !currentWeekStart) {
+        currentWeekStart = getWeekStart(new Date());
+    }
+    if (view === 'daily') {
+        currentDay = new Date();
+    }
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.view === view) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Render the appropriate calendar view
+    renderCalendar();
+}
+
 // Make functions globally available
 window.previousMonth = previousMonth;
 window.nextMonth = nextMonth;
+window.showCalendarView = showCalendarView;
 window.approveReservation = approveReservation;
 window.declineReservation = declineReservation;
 window.goBackToDashboard = goBackToDashboard;
 window.highlightDateFromMail = highlightDateFromMail;
+window.renderReservationsList = renderReservationsList;

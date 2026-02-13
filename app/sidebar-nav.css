@@ -63,9 +63,9 @@
 
 /* Mail/Notifications Button - Top right corner */
 .mail-button {
-    position: fixed;
-    top: 20px;
-    right: 20px;
+    position: absolute;
+    top: 45px;
+    right: 60px;
     z-index: 1003;
     background: transparent;
     border: none;
@@ -199,54 +199,55 @@
 }
 
 
-/* Hamburger Menu Button */
+/* Hamburger Menu Button - Minimalist Design */
 .menu-toggle {
-    position: fixed;
-    top: 40px;
-    left: 5%;
-    z-index: 1001;
-    background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    position: absolute;
+    top: 45px;
+    left: 60px;
+    z-index: 100;
+    background: transparent;
+    border: 3px solid var(--text-color);
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
 }
 
-/* Adjust hamburger position on specific pages to avoid overlap */
+/* Force light mode hamburger on laboratory, mail, and profile pages */
 body[data-page="laboratory"] .menu-toggle,
 body[data-page="mail"] .menu-toggle,
 body[data-page="profile"] .menu-toggle {
-    top: 20px;
-    left: 20px;
+    border-color: white;
 }
 
-[data-theme="dark"] .menu-toggle {
-    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+body[data-page="laboratory"] .menu-toggle i,
+body[data-page="mail"] .menu-toggle i,
+body[data-page="profile"] .menu-toggle i {
+    color: white;
+}
+
+body[data-page="laboratory"] .menu-toggle:hover,
+body[data-page="mail"] .menu-toggle:hover,
+body[data-page="profile"] .menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
 }
 
 .menu-toggle:hover {
-    background: linear-gradient(135deg, #2a3a3f 0%, #081316 100%);
+    background: var(--hover-bg);
     transform: scale(1.05);
-}
-
-[data-theme="dark"] .menu-toggle:hover {
-    background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 100%);
+    border-color: var(--text-color);
 }
 
 .menu-toggle i {
-    color: white;
-    font-size: 24px;
+    color: var(--text-color);
+    font-size: 20px;
     transition: all 0.3s ease;
-}
-
-[data-theme="dark"] .menu-toggle i {
-    color: #081316;
 }
 
 /* Hide hamburger menu when sidebar is open */
@@ -368,16 +369,15 @@ body[data-page="profile"] .menu-toggle {
 /* Mobile styles */
 @media (max-width: 768px) {
     .menu-toggle {
-        top: 30px;
-        left: 5%;
+        position: absolute;
+        top: 20px;
+        left: 20px;
     }
     
-    /* Adjust for specific pages on mobile */
-    body[data-page="laboratory"] .menu-toggle,
-    body[data-page="mail"] .menu-toggle,
-    body[data-page="profile"] .menu-toggle {
-        top: 15px;
-        left: 15px;
+    /* Align mail button with hamburger menu in mobile */
+    .mail-button {
+        top: 20px;
+        right: 20px;
     }
     
     .dash-nav {

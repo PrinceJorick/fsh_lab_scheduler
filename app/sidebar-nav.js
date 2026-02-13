@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeSidebar() {
-    // Create hamburger button (now in upper right)
+    // Create hamburger button
     const menuToggle = document.createElement('button');
     menuToggle.className = 'menu-toggle';
     menuToggle.setAttribute('aria-label', 'Toggle Menu');
@@ -33,8 +33,13 @@ function initializeSidebar() {
     const overlay = document.createElement('div');
     overlay.className = 'sidebar-overlay';
     
-    // Insert elements into DOM
-    document.body.insertBefore(menuToggle, document.body.firstChild);
+    // Insert elements into DOM - hamburger goes in dashboard-container, overlay in body
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (dashboardContainer) {
+        dashboardContainer.insertBefore(menuToggle, dashboardContainer.firstChild);
+    } else {
+        document.body.insertBefore(menuToggle, document.body.firstChild);
+    }
     document.body.insertBefore(overlay, document.body.firstChild);
     
     const dashNav = document.querySelector('.dash-nav');

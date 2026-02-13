@@ -49,11 +49,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadMessages() {
     const email = localStorage.getItem('fsh_user_email');
+    const role = localStorage.getItem('fsh_user_role');
     
     // Sync notification statuses with reservation statuses before loading
     syncNotificationStatuses();
     
-    const notifications = getUserNotifications(email);
+    let notifications = getUserNotifications(email);
+    
+    // For teachers, also include their pending reservations
+    if (role === 'Teacher') {
+        const pendingReservations = getPendingReservationsForTeacher(email);
+        
+        // Convert pending reservations to notification format
+        const reservationNotifications = pendingReservations.map(res => ({
+            id: `res_${res.id}`, // Prefix to distinguish from regular notifications
+            type: 'reservation',
+            reservationId: res.id,
+            from: email,
+            to: email,
+            subject: `Pending: ${res.lab}`,
+            message: `Your reservation for ${res.lab} is pending approval`,
+            lab: res.lab,
+            date: res.date,
+            timeSlot: res.timeSlot,
+            status: 'pending',
+            read: true, // Mark as read since they created it
+            createdAt: res.createdAt,
+            teacherName: res.teacherName,
+            subject: res.subject,
+            grade: res.grade,
+            students: res.students,
+            purpose: res.purpose
+        }));
+        
+        // Combine notifications and pending reservations
+        notifications = [...notifications, ...reservationNotifications];
+    }
+    
+    // Sort: pending first, then by creation date (newest first)
+    // This applies to both teachers and admins
+    notifications.sort((a, b) => {
+        // Pending items always come first
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        // Within same status, sort by date (newest first)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
     
     // Update counts
     updateCounts(notifications);
@@ -63,6 +104,14 @@ function loadMessages() {
     
     // Render messages
     renderMessages(filtered);
+}
+
+function getPendingReservationsForTeacher(email) {
+    const reservations = getAllReservations();
+    return reservations.filter(r => 
+        r.requester === email && 
+        r.status === 'pending'
+    );
 }
 
 function syncNotificationStatuses() {
@@ -163,6 +212,7 @@ function createMessageElement(notification) {
         <div class="message-header">
             <div class="message-title">
                 <h3>${notification.subject}</h3>
+                ${notification.status === 'pending' && notification.type === 'reservation' ? `<span class="message-badge pending">pending</span>` : ''}
                 ${notification.status !== 'pending' ? `<span class="message-badge ${notification.status}">${notification.status}</span>` : ''}
             </div>
             <span class="message-time">${timeAgo}</span>
@@ -249,6 +299,15 @@ function openMessage(notification) {
         `;
     } else if (role !== 'Admin' && notification.type === 'approval' && reservation) {
         // For teachers viewing approval notifications, show view schedule button
+        actionsHtml = `
+            <div class="message-actions">
+                <button class="action-btn view-lab" onclick="viewScheduleInLaboratory('${notification.lab}', '${reservation.date}', '${reservation.timeSlot}')">
+                    <i class="fas fa-calendar-alt"></i> View Schedule
+                </button>
+            </div>
+        `;
+    } else if (role !== 'Admin' && notification.type === 'reservation' && reservation) {
+        // For teachers viewing their pending reservations
         actionsHtml = `
             <div class="message-actions">
                 <button class="action-btn view-lab" onclick="viewScheduleInLaboratory('${notification.lab}', '${reservation.date}', '${reservation.timeSlot}')">

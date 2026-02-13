@@ -355,6 +355,31 @@ nav img[src*="fsh_logo"] {
 }
 
 /* ============================================================================
+   DARK MODE OVERRIDES FOR LOGIN/SIGNUP LINKS
+   ============================================================================ */
+
+/* Sign up / Sign in links in dark mode */
+[data-theme="dark"] .content p a {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .content p a:hover {
+    opacity: 0.8;
+}
+
+/* Google Sign-In Button Dark Mode Override */
+[data-theme="dark"] #buttonDiv-login,
+[data-theme="dark"] #buttonDiv-signup {
+    filter: invert(1) hue-rotate(180deg);
+    border-radius: 50px;
+}
+
+[data-theme="dark"] #buttonDiv-login > div,
+[data-theme="dark"] #buttonDiv-signup > div {
+    border-radius: 50px !important;
+}
+
+/* ============================================================================
    BACK NAVIGATION
    ============================================================================ */
 
@@ -413,6 +438,7 @@ nav img[src*="fsh_logo"] {
    ============================================================================ */
 
 .dashboard-container {
+    position: relative;
     width: 100%;
     min-height: 100vh;
     background-color: var(--bg-color);
@@ -466,11 +492,30 @@ nav img[src*="fsh_logo"] {
     padding: 40px 5%;
 }
 
+/* Add extra left padding on desktop to account for hamburger menu */
+@media (min-width: 769px) {
+    .main-content {
+        padding-left: calc(60px + 44px + 20px); /* hamburger position + width + gap */
+        padding-right: calc(60px + 50px + 20px); /* mail button position + width + gap */
+    }
+}
+
+.main-content header {
+    margin-bottom: 30px;
+}
+
 .main-content h1 {
     font-size: clamp(2rem, 4vw, 2.5rem);
     font-weight: 700;
-    margin-bottom: 30px;
     color: var(--text-color);
+    padding-left: 0;
+    transition: padding-left 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .main-content h1 {
+        padding-left: 0; /* Remove padding on mobile */
+    }
 }
 
 /* ============================================================================
@@ -534,6 +579,13 @@ nav img[src*="fsh_logo"] {
     color: white;
     padding: 40px 5%;
     margin-bottom: 40px;
+}
+
+/* Add extra left padding on desktop to account for hamburger menu */
+@media (min-width: 769px) {
+    .lab-header {
+        padding-left: calc(60px + 44px + 20px); /* hamburger position + width + gap */
+    }
 }
 
 .lab-header-content {
@@ -614,6 +666,48 @@ nav img[src*="fsh_logo"] {
     color: var(--text-color);
 }
 
+.calendar-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 5px;
+    background: var(--hover-bg);
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.view-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-btn:hover {
+    background: var(--card-bg);
+}
+
+.view-btn.active {
+    background: var(--button-bg);
+    color: var(--button-text);
+}
+
+.view-btn i {
+    font-size: 16px;
+}
+
 .calendar-nav {
     display: flex;
     gap: 10px;
@@ -677,6 +771,12 @@ nav img[src*="fsh_logo"] {
     transform: scale(1.05);
 }
 
+/* Allow past dates to be hoverable when they have a pointer cursor (admin view) */
+.calendar-day.past[style*="cursor: pointer"]:hover {
+    background: var(--hover-bg);
+    transform: scale(1.05);
+}
+
 .calendar-day.empty {
     cursor: default;
 }
@@ -710,6 +810,60 @@ nav img[src*="fsh_logo"] {
 .calendar-day.selected {
     background: #081316;
     color: white;
+}
+
+/* Daily View Styles */
+.calendar-day.daily-view {
+    aspect-ratio: auto;
+    min-height: 200px;
+    flex-direction: column;
+    padding: 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+}
+
+.daily-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.daily-day-name {
+    font-size: clamp(14px, 2vw, 16px);
+    font-weight: 500;
+    color: var(--secondary-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.daily-day-number {
+    font-size: clamp(48px, 10vw, 72px);
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1;
+}
+
+.daily-month-year {
+    font-size: clamp(14px, 2vw, 16px);
+    color: var(--secondary-text);
+}
+
+.calendar-day.daily-view.selected {
+    border-color: #081316;
+    background: var(--card-bg);
+}
+
+.calendar-day.daily-view.selected .daily-day-number {
+    color: #081316;
+}
+
+[data-theme="dark"] .calendar-day.daily-view.selected {
+    border-color: #ffffff;
+}
+
+[data-theme="dark"] .calendar-day.daily-view.selected .daily-day-number {
+    color: #ffffff;
 }
 
 /* ============================================================================
@@ -784,12 +938,16 @@ nav img[src*="fsh_logo"] {
 }
 
 #selected-info {
+    padding: 15px;
     background: var(--hover-bg);
+    border-radius: 10px;
+    margin-bottom: 20px;
     color: var(--text-color);
 }
 
 #selected-info p {
-    color: var(--text-color);
+    color: var(--secondary-text);
+    margin: 0;
 }
 
 .form-group {
@@ -883,6 +1041,13 @@ nav img[src*="fsh_logo"] {
     border-left: 4px solid #081316;
 }
 
+[data-theme="dark"] .reservation-item {
+    background: #2a2a2a;
+    border-left-color: #ffffff;
+    border: 1px solid #444444;
+    border-left: 4px solid #ffffff;
+}
+
 .reservation-item.pending {
     border-left-color: #ffa500;
 }
@@ -892,6 +1057,18 @@ nav img[src*="fsh_logo"] {
 }
 
 .reservation-item.declined {
+    border-left-color: #ff4d4d;
+}
+
+[data-theme="dark"] .reservation-item.pending {
+    border-left-color: #ffa500;
+}
+
+[data-theme="dark"] .reservation-item.approved {
+    border-left-color: #4caf50;
+}
+
+[data-theme="dark"] .reservation-item.declined {
     border-left-color: #ff4d4d;
 }
 
@@ -929,14 +1106,29 @@ nav img[src*="fsh_logo"] {
     color: #f57c00;
 }
 
+[data-theme="dark"] .reservation-status.pending {
+    background: rgba(245, 124, 0, 0.2);
+    color: #ffb74d;
+}
+
 .reservation-status.approved {
     background: #e8f5e9;
     color: #2e7d32;
 }
 
+[data-theme="dark"] .reservation-status.approved {
+    background: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+}
+
 .reservation-status.declined {
     background: #ffebee;
     color: #c62828;
+}
+
+[data-theme="dark"] .reservation-status.declined {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef5350;
 }
 
 .reservation-actions {
@@ -1087,12 +1279,44 @@ nav img[src*="fsh_logo"] {
         padding: 20px;
     }
 
+    .calendar-controls {
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .view-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .view-btn {
+        padding: 10px 15px;
+    }
+
+    .calendar-nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .view-btn i {
+        font-size: 14px;
+    }
+
     .calendar-grid {
         gap: 5px;
     }
 
     .calendar-day {
         font-size: 12px;
+    }
+
+    .calendar-day.daily-view {
+        min-height: 150px;
+    }
+
+    .daily-day-number {
+        font-size: 48px !important;
     }
 
     .time-slots-grid {

@@ -32,7 +32,7 @@
                 <div class="lab-header-content">
                     <div class="lab-header-left">
                         <h1 id="lab-name">Laboratory</h1>
-                        <p>Select a date and time to make a reservation</p>
+                        <p id="lab-subtitle">Select a date and time to make a reservation</p>
                     </div>
                     <div class="lab-header-right">
                         <button class="back-btn" onclick="goBackToDashboard()">
@@ -44,12 +44,22 @@
             </div>
 
             <main class="main-content">
-                <!-- User View (Teachers) -->
-                <div id="user-view">
-                    <!-- Calendar -->
-                    <div class="calendar-container">
-                        <div class="calendar-header">
-                            <h2>Select Date</h2>
+                <!-- Shared Calendar for Both Views -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <h2 id="calendar-title">Select Date</h2>
+                        <div class="calendar-controls" id="user-calendar-controls">
+                            <div class="view-toggle">
+                                <button class="view-btn active" onclick="showCalendarView('daily')" data-view="daily" title="Daily View">
+                                    <i class="fas fa-calendar-day"></i>
+                                </button>
+                                <button class="view-btn" onclick="showCalendarView('weekly')" data-view="weekly" title="Weekly View">
+                                    <i class="fas fa-calendar-week"></i>
+                                </button>
+                                <button class="view-btn" onclick="showCalendarView('monthly')" data-view="monthly" title="Monthly View">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                            </div>
                             <div class="calendar-nav">
                                 <button onclick="previousMonth()">
                                     <i class="fas fa-chevron-left"></i>
@@ -60,9 +70,23 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="calendar-grid" id="calendar-grid"></div>
+                        <div class="calendar-controls" id="admin-calendar-controls" style="display: none;">
+                            <div class="calendar-nav">
+                                <button onclick="previousMonth()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="admin-month-year">January 2024</span>
+                                <button onclick="nextMonth()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
 
+                <!-- User View (Teachers) -->
+                <div id="user-view">
                     <!-- Time Slots -->
                     <div class="time-slots-container">
                         <h3>Select Time Slot</h3>
@@ -73,11 +97,16 @@
                     <div class="reservation-form">
                         <h3>Reservation Details</h3>
                         
-                        <div id="selected-info" style="padding: 15px; background: #f9f9f9; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="color: #707475;">Please select a date and time slot</p>
+                        <div id="selected-info">
+                            <p>Please select a date and time slot</p>
                         </div>
 
                         <form id="reservation-form">
+                            <div class="form-group">
+                                <label for="teacher-name">Teacher's Name</label>
+                                <input type="text" id="teacher-name" required placeholder="Enter your full name">
+                            </div>
+
                             <div class="form-group">
                                 <label for="subject">Subject</label>
                                 <select id="subject" required>
@@ -117,23 +146,6 @@
 
                 <!-- Admin View -->
                 <div id="admin-view" class="hidden">
-                    <!-- Calendar (View Only) -->
-                    <div class="calendar-container">
-                        <div class="calendar-header">
-                            <h2>Calendar Overview</h2>
-                            <div class="calendar-nav">
-                                <button onclick="previousMonth()">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <span id="current-month-year-admin">January 2024</span>
-                                <button onclick="nextMonth()">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="calendar-grid" id="calendar-grid-admin"></div>
-                    </div>
-
                     <!-- Reservations Management -->
                     <div class="admin-panel">
                         <h3>Manage Reservations</h3>
@@ -154,34 +166,6 @@
                 
                 // Update all lab name displays
                 document.getElementById('lab-name').textContent = labName;
-                
-                // Sync admin calendar month display
-                const syncMonthDisplays = () => {
-                    const mainDisplay = document.getElementById('current-month-year');
-                    const adminDisplay = document.getElementById('current-month-year-admin');
-                    if (mainDisplay && adminDisplay) {
-                        adminDisplay.textContent = mainDisplay.textContent;
-                    }
-                };
-                
-                // Override renderCalendar to sync both calendars for admin
-                const originalRenderCalendar = window.renderCalendar || renderCalendar;
-                window.renderCalendar = function() {
-                    if (originalRenderCalendar) {
-                        originalRenderCalendar();
-                    }
-                    syncMonthDisplays();
-                    
-                    // Also render in admin view if visible
-                    const role = localStorage.getItem('fsh_user_role');
-                    if (role === 'Admin') {
-                        const adminGrid = document.getElementById('calendar-grid-admin');
-                        const mainGrid = document.getElementById('calendar-grid');
-                        if (adminGrid && mainGrid) {
-                            adminGrid.innerHTML = mainGrid.innerHTML;
-                        }
-                    }
-                };
             });
         </script>
         <script src="laboratory.js"></script>

@@ -9,6 +9,13 @@
     margin-bottom: 0;
 }
 
+/* Add extra left padding on desktop to account for hamburger menu */
+@media (min-width: 769px) {
+    .mail-header {
+        padding-left: calc(60px + 44px + 20px); /* hamburger position + width + gap */
+    }
+}
+
 [data-theme="dark"] .mail-header {
     background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
 }
@@ -259,7 +266,7 @@
 
 .unread-indicator {
     position: absolute;
-    top: 20px;
+    top: 12px;
     right: 20px;
     width: 10px;
     height: 10px;
