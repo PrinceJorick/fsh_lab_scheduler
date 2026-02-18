@@ -218,24 +218,26 @@
     padding: 0;
 }
 
-/* Force light mode hamburger on laboratory, mail, and profile pages */
-body[data-page="laboratory"] .menu-toggle,
-body[data-page="mail"] .menu-toggle,
-body[data-page="profile"] .menu-toggle {
-    border-color: white;
-}
+/* Force white hamburger on laboratory, mail, and profile pages (desktop only) */
+@media (min-width: 769px) {
+    body[data-page="laboratory"] .menu-toggle,
+    body[data-page="mail"] .menu-toggle,
+    body[data-page="profile"] .menu-toggle {
+        border-color: white;
+    }
 
-body[data-page="laboratory"] .menu-toggle i,
-body[data-page="mail"] .menu-toggle i,
-body[data-page="profile"] .menu-toggle i {
-    color: white;
-}
+    body[data-page="laboratory"] .menu-toggle i,
+    body[data-page="mail"] .menu-toggle i,
+    body[data-page="profile"] .menu-toggle i {
+        color: white;
+    }
 
-body[data-page="laboratory"] .menu-toggle:hover,
-body[data-page="mail"] .menu-toggle:hover,
-body[data-page="profile"] .menu-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
+    body[data-page="laboratory"] .menu-toggle:hover,
+    body[data-page="mail"] .menu-toggle:hover,
+    body[data-page="profile"] .menu-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+    }
 }
 
 .menu-toggle:hover {
@@ -372,6 +374,28 @@ body[data-page="profile"] .menu-toggle:hover {
         position: absolute;
         top: 20px;
         left: 20px;
+    }
+
+    /* On non-dashboard pages, raise the hamburger above the page header */
+    body[data-page="laboratory"] .menu-toggle,
+    body[data-page="mail"] .menu-toggle,
+    body[data-page="profile"] .menu-toggle {
+        position: absolute;
+        z-index: 1001;
+        border-color: var(--text-color);
+    }
+
+    body[data-page="laboratory"] .menu-toggle i,
+    body[data-page="mail"] .menu-toggle i,
+    body[data-page="profile"] .menu-toggle i {
+        color: var(--text-color);
+    }
+
+    body[data-page="laboratory"] .menu-toggle:hover,
+    body[data-page="mail"] .menu-toggle:hover,
+    body[data-page="profile"] .menu-toggle:hover {
+        background: var(--hover-bg);
+        border-color: var(--text-color);
     }
     
     /* Align mail button with hamburger menu in mobile */

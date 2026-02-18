@@ -47,7 +47,7 @@ let otpData        = null;
 function handleSelection(clickedBtn) {
     selectedRole = clickedBtn.innerText;
     const emailInput = document.querySelector('#login-email');
-    if (emailInput) emailInput.placeholder = 'usernameid@firstasia.edu.ph';
+    if (emailInput) emailInput.placeholder = selectedRole === 'Admin' ? 'adminid@firstasia.edu.ph' : 'teacherid@firstasia.edu.ph';
     clearPasswordField('login-password');
     showView('login-view');
 }
