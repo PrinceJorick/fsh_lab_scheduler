@@ -1,10 +1,25 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>FSH Lab Scheduler</title>
-        <meta charset="utf-8">
+    <title>FSH Lab Scheduler</title>
+    <meta charset="utf-8">
+    
+    <script>
+        (async () => {
+            const token = localStorage.getItem('fsh_token');
+            if (!token) return;
+            try {
+                const res = await fetch('https://fsh-scheduler.medranowilljairuz.workers.dev/api/session', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) window.location.replace('dashboard.html');
+            } catch {}
+        })();
+    </script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="google-auth.css">
         <meta name="description" content="">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

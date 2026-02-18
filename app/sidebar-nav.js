@@ -7,15 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDarkMode();
     initializeMailButton();
     
-    // Add page identifier to body for page-specific styling
-    const path = window.location.pathname;
-    if (path.includes('laboratory.html')) {
+    // Detect current page by DOM elements instead of pathname,
+    // so it works on Cloudflare Pages where .html is stripped from URLs.
+    if (document.querySelector('.lab-header')) {
         document.body.setAttribute('data-page', 'laboratory');
-    } else if (path.includes('mail.html')) {
+    } else if (document.querySelector('.mail-container')) {
         document.body.setAttribute('data-page', 'mail');
-    } else if (path.includes('profile.html')) {
+    } else if (document.querySelector('.profile-container')) {
         document.body.setAttribute('data-page', 'profile');
-    } else if (path.includes('dashboard.html')) {
+    } else if (document.querySelector('.lab-grid')) {
         document.body.setAttribute('data-page', 'dashboard');
     }
 });
@@ -174,8 +174,11 @@ window.toggleTheme = toggleTheme;
 // ============================================================================
 
 function initializeMailButton() {
-    // Only show mail button on dashboard page
-    if (!window.location.pathname.includes('dashboard.html')) {
+    // Use a DOM check instead of pathname so this works on Cloudflare Pages
+    // where URLs don't have .html (e.g. /dashboard instead of /dashboard.html).
+    // .lab-grid is unique to dashboard.html so it's a reliable signal.
+    const isDashboard = !!document.querySelector('.lab-grid');
+    if (!isDashboard) {
         return;
     }
     

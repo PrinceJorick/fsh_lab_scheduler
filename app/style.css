@@ -367,17 +367,12 @@ nav img[src*="fsh_logo"] {
     opacity: 0.8;
 }
 
-/* Google Sign-In Button Dark Mode Override */
-[data-theme="dark"] #buttonDiv-login,
-[data-theme="dark"] #buttonDiv-signup {
-    filter: invert(1) hue-rotate(180deg);
-    border-radius: 50px;
+/* Dark mode glow for index page nav logo */
+[data-theme="dark"] nav img[src*="fsh_logo"] {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
 }
 
-[data-theme="dark"] #buttonDiv-login > div,
-[data-theme="dark"] #buttonDiv-signup > div {
-    border-radius: 50px !important;
-}
+/* Google Sign-In Button styles are handled in google-auth.css */
 
 /* ============================================================================
    BACK NAVIGATION

@@ -1,409 +1,261 @@
 // ============================================================================
-// NOTIFICATIONS.JS - Notification Management System
+// NOTIFICATIONS.JS - Real-time Notification Management
+// Polls the Worker API every 5 seconds for new notifications
 // ============================================================================
 
+const NOTIF_API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+
+let notifPollingInterval = null;
+
+// Initialize lastUnreadCount from localStorage so we don't show toasts for old notifications
+function getLastUnreadCount() {
+    const stored = localStorage.getItem('fsh_last_unread_count');
+    return stored ? parseInt(stored, 10) : -1; // -1 means "first time ever"
+}
+
+function setLastUnreadCount(count) {
+    localStorage.setItem('fsh_last_unread_count', count.toString());
+}
+
+let lastUnreadCount = getLastUnreadCount();
+
 // ============================================================================
-// NOTIFICATION CREATION
+// API HELPER
 // ============================================================================
 
-function createNotification(data) {
-    const notification = {
-        id: Date.now().toString(),
-        type: data.type, // 'request' or 'approval'
-        reservationId: data.reservationId,
-        from: data.from,
-        to: data.to,
-        subject: data.subject || '',
-        message: data.message,
-        lab: data.lab || '',
-        date: data.date || '',
-        timeSlot: data.timeSlot || '',
-        status: data.status || 'pending',
-        read: false,
-        createdAt: new Date().toISOString()
-    };
-    
-    // Save notification
-    saveNotification(notification);
-    
-    // Show push notification
-    showPushNotification(notification);
-    
-    // Update badge count
-    updateNotificationBadge();
-    
-    return notification;
+function notifGetToken() { return localStorage.getItem('fsh_token'); }
+
+async function notifApiCall(endpoint, method = 'GET', body = null) {
+    const token   = notifGetToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    const res = await fetch(`${NOTIF_API_BASE}${endpoint}`, options);
+    return res.json();
 }
 
 // ============================================================================
-// NOTIFICATION STORAGE
+// FETCH NOTIFICATIONS FROM SERVER
 // ============================================================================
 
-function saveNotification(notification) {
-    const notifications = getAllNotifications();
-    notifications.push(notification);
-    localStorage.setItem('fsh_notifications', JSON.stringify(notifications));
-}
-
-function getAllNotifications() {
-    const data = localStorage.getItem('fsh_notifications');
-    return data ? JSON.parse(data) : [];
-}
-
-function getNotificationById(id) {
-    const notifications = getAllNotifications();
-    return notifications.find(n => n.id === id);
-}
-
-function getUserNotifications(userEmail) {
-    const notifications = getAllNotifications();
-    return notifications.filter(n => n.to === userEmail)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-}
-
-function markAsRead(notificationId) {
-    const notifications = getAllNotifications();
-    const notification = notifications.find(n => n.id === notificationId);
-    
-    if (notification) {
-        notification.read = true;
-        localStorage.setItem('fsh_notifications', JSON.stringify(notifications));
-        updateNotificationBadge();
+async function fetchNotificationsFromServer() {
+    try {
+        const data = await notifApiCall('/api/notifications');
+        if (!data.success) return null;
+        return data;
+    } catch (err) {
+        console.error('Failed to fetch notifications:', err);
+        return null;
     }
-}
-
-function getUnreadCount(userEmail) {
-    const notifications = getUserNotifications(userEmail);
-    return notifications.filter(n => !n.read).length;
 }
 
 // ============================================================================
 // NOTIFICATION BADGE
 // ============================================================================
 
-function updateNotificationBadge() {
-    const email = localStorage.getItem('fsh_user_email');
-    if (!email) return;
-    
-    const unreadCount = getUnreadCount(email);
-    const badge = document.getElementById('notification-badge');
-    
-    if (badge) {
-        if (unreadCount > 0) {
-            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
-        }
-    }
-}
+async function updateNotificationBadge() {
+    const token = notifGetToken();
+    if (!token) return;
 
-// ============================================================================
-// PUSH NOTIFICATIONS
-// ============================================================================
+    try {
+        const data = await notifApiCall('/api/notifications');
+        if (!data.success) return;
 
-function showPushNotification(notification) {
-    // Check if browser supports notifications
-    if (!("Notification" in window)) {
-        console.log("This browser does not support desktop notification");
-        // Show in-app toast instead
-        showToastNotification(notification);
-        return;
-    }
-    
-    // Check if permission is granted
-    if (Notification.permission === "granted") {
-        displayNotification(notification);
-        showToastNotification(notification); // Also show toast for immediate feedback
-    } 
-    // Otherwise, ask for permission
-    else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then(function(permission) {
-            if (permission === "granted") {
-                displayNotification(notification);
-                showToastNotification(notification);
+        const unreadCount = data.unreadCount || 0;
+        const badge       = document.getElementById('notification-badge');
+
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent    = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display  = 'flex';
             } else {
-                // Permission denied, show toast only
-                showToastNotification(notification);
+                badge.style.display  = 'none';
             }
-        });
-    } else {
-        // Permission denied, show toast only
-        showToastNotification(notification);
+        }
+
+        // Only show toast if count INCREASED and this isn't the first time checking
+        if (unreadCount > lastUnreadCount && lastUnreadCount >= 0) {
+            const newNotifs = data.notifications.filter(n => !n.read);
+            // Only toast the newest unread notification to avoid spam
+            if (newNotifs.length > 0) {
+                showToastNotification(newNotifs[0]);
+            }
+        }
+
+        lastUnreadCount = unreadCount;
+        setLastUnreadCount(unreadCount); // ← Save to localStorage
+
+    } catch (err) {
+        console.error('Notification badge update failed:', err);
     }
 }
 
-// In-app toast notification
+// ============================================================================
+// POLLING
+// ============================================================================
+
+function startNotificationPolling() {
+    // Initial check
+    updateNotificationBadge();
+
+    // Poll every 5 seconds
+    notifPollingInterval = setInterval(updateNotificationBadge, 5000);
+}
+
+function stopNotificationPolling() {
+    if (notifPollingInterval) clearInterval(notifPollingInterval);
+}
+
+// ============================================================================
+// MARK AS READ
+// ============================================================================
+
+async function markAsRead(notificationId) {
+    try {
+        await notifApiCall(`/api/notifications/${notificationId}/read`, 'PATCH');
+        await updateNotificationBadge();
+    } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+    }
+}
+
+async function markAllAsRead() {
+    try {
+        await notifApiCall('/api/notifications/read-all', 'PATCH');
+        await updateNotificationBadge();
+    } catch (err) {
+        console.error('Failed to mark all notifications as read:', err);
+    }
+}
+
+// ============================================================================
+// TOAST NOTIFICATION (in-app)
+// ============================================================================
+
 function showToastNotification(notification) {
-    // Create toast container if it doesn't exist
     let container = document.getElementById('toast-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
         container.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 400px;
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 10px; max-width: 400px;
         `;
         document.body.appendChild(container);
     }
-    
-    // Create toast
+
     const toast = document.createElement('div');
     toast.className = 'notification-toast';
-    
-    let icon = '';
-    let title = '';
+
+    let icon    = '';
+    let title   = '';
     let message = '';
     let bgColor = '';
-    
+
     if (notification.type === 'request') {
-        icon = '📬';
-        title = 'New Reservation Request';
+        icon    = '📬';
+        title   = 'New Reservation Request';
         message = `${notification.from.split('@')[0]} requested ${notification.lab}`;
         bgColor = '#081316';
     } else if (notification.type === 'approval') {
         if (notification.status === 'approved') {
-            icon = '✅';
-            title = 'Reservation Approved!';
+            icon    = '✅';
+            title   = 'Reservation Approved!';
             message = `Your ${notification.lab} reservation has been approved`;
             bgColor = '#22c55e';
-        } else if (notification.status === 'rejected') {
-            icon = '❌';
-            title = 'Reservation Not Approved';
+        } else {
+            icon    = '❌';
+            title   = 'Reservation Not Approved';
             message = `Your ${notification.lab} reservation was not approved`;
             bgColor = '#ef4444';
         }
     }
-    
+
+    if (!title) return; // Don't show toast for unknown types
+
     toast.style.cssText = `
-        background: ${bgColor};
-        color: white;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        cursor: pointer;
-        animation: slideInRight 0.3s ease;
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        min-width: 320px;
+        background: ${bgColor}; color: white; padding: 16px 20px;
+        border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        cursor: pointer; animation: slideInRight 0.3s ease;
+        display: flex; gap: 12px; align-items: flex-start; min-width: 320px;
     `;
-    
+
     toast.innerHTML = `
-        <div style="font-size: 24px; flex-shrink: 0;">${icon}</div>
-        <div style="flex: 1;">
-            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">${title}</div>
-            <div style="font-size: 13px; opacity: 0.95;">${message}</div>
+        <div style="font-size:24px; flex-shrink:0;">${icon}</div>
+        <div style="flex:1;">
+            <div style="font-weight:600; font-size:14px; margin-bottom:4px;">${title}</div>
+            <div style="font-size:13px; opacity:0.95;">${message}</div>
         </div>
-        <button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">×</button>
+        <button onclick="this.parentElement.remove()" style="
+            background: rgba(255,255,255,0.2); border: none; color: white;
+            width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+            font-size: 16px; flex-shrink: 0; display: flex;
+            align-items: center; justify-content: center;">×</button>
     `;
-    
+
     toast.onclick = function(e) {
-        if (e.target.tagName !== 'BUTTON') {
-            window.location.href = 'mail.html';
-        }
+        if (e.target.tagName !== 'BUTTON') window.location.href = 'mail.html';
     };
-    
+
     container.appendChild(toast);
-    
-    // Add slide in animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-        .notification-toast:hover {
-            transform: translateX(-5px);
-            transition: transform 0.2s ease;
-        }
-    `;
+
+    // Add slide animation styles once
     if (!document.getElementById('toast-styles')) {
-        style.id = 'toast-styles';
+        const style = document.createElement('style');
+        style.id    = 'toast-styles';
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(400px); opacity: 0; }
+                to   { transform: translateX(0);     opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0);     opacity: 1; }
+                to   { transform: translateX(400px); opacity: 0; }
+            }
+            .notification-toast:hover { transform: translateX(-5px); transition: transform 0.2s ease; }
+        `;
         document.head.appendChild(style);
     }
-    
-    // Auto remove after 7 seconds
+
+    // Auto-remove after 7 seconds
     setTimeout(() => {
         toast.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 7000);
 }
 
-function displayNotification(notification) {
-    let title = '';
-    let body = '';
-    let icon = '../public/fsh_logo_colored.png';
-    
-    if (notification.type === 'request') {
-        title = '📬 New Lab Reservation Request';
-        const fromName = notification.from.split('@')[0];
-        body = `${fromName} requested ${notification.lab}\n📅 ${formatNotificationDate(notification.date)}\n🕐 ${notification.timeSlot}`;
-    } else if (notification.type === 'approval') {
-        if (notification.status === 'approved') {
-            title = '✅ Reservation Approved!';
-            body = `Your ${notification.lab} reservation has been approved!\n📅 ${formatNotificationDate(notification.date)}\n🕐 ${notification.timeSlot}`;
-        } else if (notification.status === 'rejected') {
-            title = '❌ Reservation Not Approved';
-            body = `Your ${notification.lab} reservation was not approved.\n📅 ${formatNotificationDate(notification.date)}\n🕐 ${notification.timeSlot}\n\nPlease try a different time slot.`;
-        }
-    }
-    
-    const notif = new Notification(title, {
-        body: body,
-        icon: icon,
-        badge: icon,
-        tag: notification.id,
-        requireInteraction: false
-    });
-    
-    notif.onclick = function() {
-        window.focus();
-        window.location.href = 'mail.html';
-        notif.close();
-    };
-    
-    // Auto close after 7 seconds
-    setTimeout(() => notif.close(), 7000);
-}
-
-function formatNotificationDate(dateString) {
-    const date = new Date(dateString);
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-}
-
-// Request notification permission on page load
-function requestNotificationPermission() {
-    if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-    }
-}
-
-// ============================================================================
-// ADMIN NOTIFICATIONS (when teacher submits request)
-// ============================================================================
-
-function sendAdminNotification(reservationData) {
-    // Get all admin users
-    const admins = getAllAdmins();
-    
-    admins.forEach(adminEmail => {
-        createNotification({
-            type: 'request',
-            reservationId: reservationData.id,
-            from: reservationData.requester,
-            to: adminEmail,
-            subject: `New Lab Request: ${reservationData.lab}`,
-            message: `${reservationData.requester.split('@')[0]} has requested ${reservationData.lab} for ${reservationData.subject} class.`,
-            lab: reservationData.lab,
-            date: reservationData.date,
-            timeSlot: reservationData.timeSlot,
-            status: 'pending'
-        });
-    });
-}
-
-// ============================================================================
-// TEACHER NOTIFICATIONS (when admin approves/rejects)
-// ============================================================================
-
-function sendApprovalNotification(reservationData, approved = true) {
-    const status = approved ? 'approved' : 'rejected';
-    const message = approved 
-        ? `Your reservation for ${reservationData.lab} on ${reservationData.date} (${reservationData.timeSlot}) has been approved!`
-        : `Your reservation for ${reservationData.lab} on ${reservationData.date} (${reservationData.timeSlot}) was not approved. Please try a different time slot.`;
-    
-    createNotification({
-        type: 'approval',
-        reservationId: reservationData.id,
-        from: localStorage.getItem('fsh_user_email') || 'admin',
-        to: reservationData.requester,
-        subject: approved ? 'Reservation Approved' : 'Reservation Not Approved',
-        message: message,
-        lab: reservationData.lab,
-        date: reservationData.date,
-        timeSlot: reservationData.timeSlot,
-        status: status
-    });
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-function getAllAdmins() {
-    // Get all users with admin role
-    const admins = [];
-    
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('user_')) {
-            const userData = JSON.parse(localStorage.getItem(key));
-            if (userData.role === 'Admin') {
-                admins.push(userData.email);
-            }
-        }
-    }
-    
-    return admins;
-}
-
-function deleteNotification(notificationId) {
-    const notifications = getAllNotifications();
-    const filtered = notifications.filter(n => n.id !== notificationId);
-    localStorage.setItem('fsh_notifications', JSON.stringify(filtered));
-    updateNotificationBadge();
-}
-
-function clearAllNotifications(userEmail) {
-    const notifications = getAllNotifications();
-    const filtered = notifications.filter(n => n.to !== userEmail);
-    localStorage.setItem('fsh_notifications', JSON.stringify(filtered));
-    updateNotificationBadge();
-}
 
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
 
+// Wait for badge element to be created before starting polling
+function waitForBadgeAndStart() {
+    const badge = document.getElementById('notification-badge');
+    if (badge) {
+        startNotificationPolling();
+    } else {
+        // Badge not ready yet, try again in 50ms
+        setTimeout(waitForBadgeAndStart, 50);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Request notification permission
-    requestNotificationPermission();
+    const token = notifGetToken();
+    if (token) {
+        // Wait for mail button/badge to be created by sidebar-nav.js
+        waitForBadgeAndStart();
+    }
     
-    // Update badge on page load
-    updateNotificationBadge();
+    window.addEventListener('beforeunload', stopNotificationPolling);
 });
 
-// Make functions globally available
-window.createNotification = createNotification;
-window.sendAdminNotification = sendAdminNotification;
-window.sendApprovalNotification = sendApprovalNotification;
-window.getUserNotifications = getUserNotifications;
-window.markAsRead = markAsRead;
-window.getUnreadCount = getUnreadCount;
-window.updateNotificationBadge = updateNotificationBadge;
-window.deleteNotification = deleteNotification;
-window.clearAllNotifications = clearAllNotifications;
+// ── Expose globals ────────────────────────────────────────────────────────────
+window.updateNotificationBadge    = updateNotificationBadge;
+window.markAsRead                 = markAsRead;
+window.markAllAsRead              = markAllAsRead;
+window.fetchNotificationsFromServer = fetchNotificationsFromServer;
+window.showToastNotification      = showToastNotification;
+window.startNotificationPolling   = startNotificationPolling;
+window.stopNotificationPolling    = stopNotificationPolling;

@@ -50,14 +50,14 @@
                         <h2 id="calendar-title">Select Date</h2>
                         <div class="calendar-controls" id="user-calendar-controls">
                             <div class="view-toggle">
-                                <button class="view-btn active" onclick="showCalendarView('daily')" data-view="daily" title="Daily View">
-                                    <i class="fas fa-calendar-day"></i>
+                                <button class="view-btn active" onclick="showCalendarView('monthly')" data-view="monthly" title="Monthly View">
+                                    <i class="fas fa-calendar"></i>
                                 </button>
                                 <button class="view-btn" onclick="showCalendarView('weekly')" data-view="weekly" title="Weekly View">
                                     <i class="fas fa-calendar-week"></i>
                                 </button>
-                                <button class="view-btn" onclick="showCalendarView('monthly')" data-view="monthly" title="Monthly View">
-                                    <i class="fas fa-calendar"></i>
+                                <button class="view-btn" onclick="showCalendarView('daily')" data-view="daily" title="Daily View">
+                                    <i class="fas fa-calendar-day"></i>
                                 </button>
                             </div>
                             <div class="calendar-nav">
@@ -114,7 +114,7 @@
                                     <option value="General Biology">General Biology</option>
                                     <option value="Physics">Physics</option>
                                     <option value="Chemistry">Chemistry</option>
-                                    <option value="E-Tech">E-Tech</option>
+                                    <option value="ETECH">ETECH</option>
                                 </select>
                             </div>
 
@@ -156,6 +156,7 @@
         </div>
 
         <script src="sidebar-nav.js"></script>
+        <script src="push-manager.js"></script>
         <script src="notifications.js"></script>
         <script src="ui.js"></script>
         <script>

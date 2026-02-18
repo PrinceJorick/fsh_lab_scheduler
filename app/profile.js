@@ -1,69 +1,91 @@
 // ============================================================================
-// PROFILE.JS - Profile Management & Password Change
+// PROFILE.JS — Cloudflare Workers Version
 // ============================================================================
+
+const API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev'; // ← same as auth.js
+
+// ── Token helpers (mirrors auth.js) ──────────────────────────────────────────
+function getToken()     { return localStorage.getItem('fsh_token'); }
+function clearSession() {
+    localStorage.removeItem('fsh_token');
+    localStorage.removeItem('fsh_user_email');
+    localStorage.removeItem('fsh_user_role');
+}
+
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const token   = getToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    return fetch(`${API_BASE}${endpoint}`, options);
+}
+
+async function requireSession() {
+    const token = getToken();
+    if (!token) { window.location.href = 'index.html'; return null; }
+
+    try {
+        const res  = await apiCall('/api/session', 'GET');
+        const data = await res.json();
+        if (!data.success) { clearSession(); window.location.href = 'index.html'; return null; }
+        localStorage.setItem('fsh_user_email', data.user.email);
+        localStorage.setItem('fsh_user_role',  data.user.role);
+        return data.user;
+    } catch {
+        const email = localStorage.getItem('fsh_user_email');
+        const role  = localStorage.getItem('fsh_user_role');
+        if (!email) { window.location.href = 'index.html'; return null; }
+        return { email, role };
+    }
+}
 
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication
-    const email = localStorage.getItem('fsh_user_email');
-    const role = localStorage.getItem('fsh_user_role');
-    
-    if (!email) {
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    // Load profile information
-    loadProfileInfo(email, role);
-    
-    // Setup form handlers
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await requireSession();
+    if (!user) return;
+
+    loadProfileInfo(user.email, user.role);
     setupPasswordChangeForm();
     setupPasswordInputListeners();
-    
-    // Update user display in nav
+
     const userDisplay = document.getElementById('user-display');
     if (userDisplay) {
-        const userName = email.split('@')[0];
-        userDisplay.innerText = `${userName} (${role})`;
+        userDisplay.innerText = `${user.email.split('@')[0]} (${user.role})`;
     }
 });
 
 // ============================================================================
-// PROFILE INFORMATION
+// PROFILE DISPLAY
 // ============================================================================
 
 function loadProfileInfo(email, role) {
-    // Extract username from email
     const userName = email.split('@')[0];
-    
-    // Format name (capitalize first letter of each word)
     const formattedName = userName
         .split('.')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
-    
-    // Update profile display
-    const profileName = document.getElementById('profile-name');
+
+    const profileName  = document.getElementById('profile-name');
     const profileEmail = document.getElementById('profile-email');
-    const profileRole = document.getElementById('profile-role');
-    
-    if (profileName) profileName.textContent = formattedName;
+    const profileRole  = document.getElementById('profile-role');
+
+    if (profileName)  profileName.textContent  = formattedName;
     if (profileEmail) profileEmail.textContent = email;
-    if (profileRole) profileRole.textContent = role;
+    if (profileRole)  profileRole.textContent  = role;
 }
 
 // ============================================================================
-// CHANGE PASSWORD MODAL
+// CHANGE PASSWORD
 // ============================================================================
 
 function showChangePassword() {
     const modal = document.getElementById('change-password-modal');
     if (modal) {
         modal.style.display = 'flex';
-        // Clear form
         document.getElementById('change-password-form')?.reset();
         clearAllPasswordErrors();
         hideAllPasswordToggles();
@@ -74,184 +96,106 @@ function closeChangePassword() {
     const modal = document.getElementById('change-password-modal');
     if (modal) {
         modal.style.display = 'none';
-        // Clear form
         document.getElementById('change-password-form')?.reset();
         clearAllPasswordErrors();
         hideAllPasswordToggles();
     }
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('change-password-modal');
-    if (event.target === modal) {
-        closeChangePassword();
-    }
-}
-
-// ============================================================================
-// PASSWORD CHANGE LOGIC
-// ============================================================================
+    if (event.target === modal) closeChangePassword();
+};
 
 function setupPasswordChangeForm() {
-    const form = document.getElementById('change-password-form');
-    if (form) {
-        form.addEventListener('submit', handlePasswordChange);
-    }
+    document.getElementById('change-password-form')
+        ?.addEventListener('submit', handlePasswordChange);
 }
 
-function handlePasswordChange(e) {
+async function handlePasswordChange(e) {
     e.preventDefault();
-    
+
     const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
+    const newPassword     = document.getElementById('new-password').value;
     const confirmPassword = document.getElementById('confirm-new-password').value;
-    
-    // Clear previous errors
+
     clearAllPasswordErrors();
-    
-    // Get user data
-    const email = localStorage.getItem('fsh_user_email');
-    const userData = getUserData(email);
-    
-    if (!userData) {
-        alert('User data not found. Please login again.');
-        logout();
-        return;
-    }
-    
-    // Verify current password
-    if (userData.password !== currentPassword) {
-        showPasswordError('current-password');
-        alert('Current password is incorrect');
-        return;
-    }
-    
-    // Validate new password
+
     if (newPassword.length < 6) {
         showPasswordError('new-password');
         alert('New password must be at least 6 characters long');
         return;
     }
-    
-    // Check if new password matches confirmation
+
     if (newPassword !== confirmPassword) {
         showPasswordError('confirm-new-password');
         alert('New passwords do not match');
         return;
     }
-    
-    // Check if new password is different from current
+
     if (newPassword === currentPassword) {
         showPasswordError('new-password');
         alert('New password must be different from current password');
         return;
     }
-    
-    // Update password
-    userData.password = newPassword;
-    saveUserData(email, userData);
-    
-    // Show success message
-    alert('Password changed successfully!');
-    
-    // Close modal and reset form
-    closeChangePassword();
+
+    try {
+        const res  = await apiCall('/api/change-password', 'POST', {
+            current_password: currentPassword,
+            new_password:     newPassword
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+            if (data.message.includes('incorrect')) showPasswordError('current-password');
+            alert(data.message);
+            return;
+        }
+
+        alert('Password changed successfully!');
+        closeChangePassword();
+
+    } catch (err) {
+        alert('Could not reach the server. Please try again.');
+        console.error(err);
+    }
 }
 
 // ============================================================================
-// PASSWORD INPUT LISTENERS
+// UTILITY
 // ============================================================================
 
 function setupPasswordInputListeners() {
-    const currentPassword = document.getElementById('current-password');
-    const newPassword = document.getElementById('new-password');
-    const confirmPassword = document.getElementById('confirm-new-password');
-    
-    if (currentPassword) {
-        currentPassword.addEventListener('input', () => {
-            clearPasswordError('current-password');
-            updatePasswordIconVisibility('current-password');
+    ['current-password', 'new-password', 'confirm-new-password'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', () => {
+            clearPasswordError(id);
+            updatePasswordIconVisibility(id);
         });
-    }
-    
-    if (newPassword) {
-        newPassword.addEventListener('input', () => {
-            clearPasswordError('new-password');
-            updatePasswordIconVisibility('new-password');
-        });
-    }
-    
-    if (confirmPassword) {
-        confirmPassword.addEventListener('input', () => {
-            clearPasswordError('confirm-new-password');
-            updatePasswordIconVisibility('confirm-new-password');
-        });
-    }
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-function getUserData(email) {
-    const data = localStorage.getItem('user_' + email);
-    return data ? JSON.parse(data) : null;
-}
-
-function saveUserData(email, userData) {
-    localStorage.setItem('user_' + email, JSON.stringify(userData));
-}
-
-function showPasswordError(inputId) {
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.classList.add('input-error');
-    }
-}
-
-function clearPasswordError(inputId) {
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.classList.remove('input-error');
-    }
-}
-
-function clearAllPasswordErrors() {
-    const inputs = ['current-password', 'new-password', 'confirm-new-password'];
-    inputs.forEach(id => clearPasswordError(id));
-}
-
-function hideAllPasswordToggles() {
-    const toggles = document.querySelectorAll('#change-password-modal .password-toggle');
-    toggles.forEach(toggle => {
-        toggle.style.display = 'none';
     });
 }
 
-function updatePasswordIconVisibility(inputId) {
-    const input = document.getElementById(inputId);
-    const icon = input?.parentElement.querySelector('.password-toggle');
-    
-    if (input && icon) {
-        icon.style.display = input.value.length > 0 ? 'block' : 'none';
-    }
+function showPasswordError(id)   { document.getElementById(id)?.classList.add('input-error'); }
+function clearPasswordError(id)  { document.getElementById(id)?.classList.remove('input-error'); }
+function clearAllPasswordErrors(){ ['current-password', 'new-password', 'confirm-new-password'].forEach(clearPasswordError); }
+function hideAllPasswordToggles(){ document.querySelectorAll('#change-password-modal .password-toggle').forEach(t => t.style.display = 'none'); }
+function updatePasswordIconVisibility(id) {
+    const input = document.getElementById(id);
+    const icon  = input?.parentElement.querySelector('.password-toggle');
+    if (input && icon) icon.style.display = input.value.length > 0 ? 'block' : 'none';
 }
 
-function goBackToDashboard() {
-    window.location.href = 'dashboard.html';
+function goBackToDashboard() { window.location.href = 'dashboard.html'; }
+
+async function logout() {
+    if (!confirm('Are you sure you want to logout?')) return;
+    await unsubscribePushNotifications();
+    await apiCall('/api/logout', 'POST').catch(() => {});
+    clearSession();
+    localStorage.removeItem('fsh_last_unread_count'); // ← Clear notification count
+    window.location.href = 'index.html';
 }
 
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('fsh_user_email');
-        localStorage.removeItem('fsh_user_role');
-        window.location.href = 'index.html';
-    }
-}
-
-// Make functions globally available
-window.showChangePassword = showChangePassword;
+window.showChangePassword  = showChangePassword;
 window.closeChangePassword = closeChangePassword;
-window.goBackToDashboard = goBackToDashboard;
-window.logout = logout;
+window.goBackToDashboard   = goBackToDashboard;
+window.logout              = logout;
