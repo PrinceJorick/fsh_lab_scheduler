@@ -1,22 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-    <title>FSH Lab Scheduler</title>
-    <meta charset="utf-8">
-    
-    <script>
-        (async () => {
-            const token = localStorage.getItem('fsh_token');
-            if (!token) return;
-            try {
-                const res = await fetch('https://fsh-scheduler.medranowilljairuz.workers.dev/api/session', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) window.location.replace('dashboard.html');
-            } catch {}
-        })();
-    </script>
+        <title>FSH Lab Scheduler</title>
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="google-auth.css">
@@ -150,6 +136,10 @@
                 <div id="otp-view">
                     <h2 class="login-subtext">Enter verification code</h2>
                     <p style="font-size: 14px; color: #707475; margin-bottom: 20px;" id="otp-email-display"></p>
+
+                    <p id="otp-sent-message" style="display: none; font-size: 14px; color: #22c55e; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-check-circle"></i> Verification code sent to your email!
+                    </p>
 
                     <input type="text" id="otp-code" class="login-input" placeholder="Enter 6-digit code" maxlength="6">
 

@@ -84,20 +84,21 @@ function getGoogleButtonTheme() {
     return savedTheme === 'dark' ? 'outline' : 'filled_black';
 }
 
-function renderGoogleButtons() {
+let buttonsRendered = false;
+
+function renderGoogleButtons(force = false) {
     if (typeof google === 'undefined') return;
+    // Don't re-render unless forced (theme change) — this prevents the flicker
+    if (buttonsRendered && !force) return;
 
     const buttonDivLogin  = document.getElementById("buttonDiv-login");
     const buttonDivSignup = document.getElementById("buttonDiv-signup");
     const theme = getGoogleButtonTheme();
 
-    const referenceEl = buttonDivLogin || buttonDivSignup;
-    const measured = referenceEl
-        ? Math.floor(referenceEl.getBoundingClientRect().width) || referenceEl.offsetWidth
-        : 0;
-
-    // Use measured width, but never pass 0 â€” fall back to 400 so Google always renders
-    const containerWidth = measured > 0 ? measured : 400;
+    // Use the buttonDiv container width, capped at Google's max of 400px
+    const refEl = buttonDivLogin || buttonDivSignup;
+    const measured = refEl ? Math.floor(refEl.getBoundingClientRect().width) : 0;
+    const containerWidth = Math.min(measured > 0 ? measured : 400, 400);
 
     const buttonConfig = {
         theme: theme,
@@ -118,39 +119,28 @@ function renderGoogleButtons() {
         buttonDivSignup.innerHTML = '';
         google.accounts.id.renderButton(buttonDivSignup, { ...buttonConfig });
     }
+
+    buttonsRendered = true;
 }
 
 window.onload = function () {
     if (typeof google === 'undefined') return;
 
-    // 1. Initialize first
+    // 1. Initialize
     google.accounts.id.initialize({
         client_id: "238536479920-v18ac5qcfh6t0vmp8evjk381g4b6ssl4.apps.googleusercontent.com",
         callback: handleCredentialResponse,
         hosted_domain: "firstasia.edu.ph"
     });
 
-    // 2. Render the button immediately (uses 400px fallback if layout not ready)
-    renderGoogleButtons();
+    // 2. Render once layout is painted to get correct container width
+    requestAnimationFrame(() => setTimeout(renderGoogleButtons, 100));
 
-    // 3. Re-render once layout is fully painted to get the exact container width
-    requestAnimationFrame(() => setTimeout(renderGoogleButtons, 150));
-
-    // 4. Prompt AFTER button is rendered so Google can show personalized button
-    setTimeout(() => google.accounts.id.prompt(), 200);
-
-    // Re-render buttons whenever the theme toggle is clicked
+    // Re-render only when theme is toggled (force = true resets the flag)
     document.addEventListener('click', function (e) {
         if (e.target.closest('.theme-toggle')) {
-            setTimeout(renderGoogleButtons, 50);
+            buttonsRendered = false;
+            setTimeout(() => renderGoogleButtons(true), 50);
         }
     });
-
-    // Re-render if the container is resized (e.g. window resize / mobile rotation)
-    const observerTarget = document.getElementById("buttonDiv-login")
-                        || document.getElementById("buttonDiv-signup");
-    if (observerTarget && window.ResizeObserver) {
-        new ResizeObserver(() => setTimeout(renderGoogleButtons, 50))
-            .observe(observerTarget.parentElement || observerTarget);
-    }
 };

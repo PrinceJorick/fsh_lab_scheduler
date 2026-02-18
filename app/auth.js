@@ -156,7 +156,7 @@ async function handleSignup() {
 // FORGOT PASSWORD (OTP stays client-side, reset hits the Worker)
 // ============================================================================
 
-function sendOTP() {
+async function sendOTP() {
     const email = getInputValue('forgot-email').toLowerCase();
     clearError('forgot-email');
 
@@ -165,48 +165,57 @@ function sendOTP() {
         return;
     }
 
-    const otp = generateOTP();
-    otpData = { email, code: otp, timestamp: Date.now(), expiresIn: 5 * 60 * 1000 };
+    try {
+        const res  = await apiCall('/api/send-otp', 'POST', { email });
+        const data = await res.json();
 
-    console.log(`OTP for ${email}: ${otp}`);
-    alert(`Your verification code is: ${otp}\n\n(In production this would be sent to your email)`);
+        if (!data.success) { alert(data.message); return; }
 
-    const display = document.getElementById('otp-email-display');
-    if (display) display.textContent = email;
+        otpData = { email };
+        const display = document.getElementById('otp-email-display');
+        if (display) display.textContent = email;
 
-    clearInput('otp-code');
-    showView('otp-view');
+        clearInput('otp-code');
+        showView('otp-view');
+
+        // Show sent confirmation
+        const sentMsg = document.getElementById('otp-sent-message');
+        if (sentMsg) {
+            sentMsg.style.display = 'block';
+            setTimeout(() => sentMsg.style.display = 'none', 5000);
+        }
+
+    } catch {
+        alert('Could not reach the server. Please try again.');
+    }
 }
 
-function verifyOTP() {
+async function verifyOTP() {
     const entered = getInputValue('otp-code');
     clearError('otp-code');
 
-    if (!otpData) {
+    if (!otpData?.email) {
         alert('No OTP request found. Please request a new code.');
         showView('forgot-password-view');
         return;
     }
 
-    if (Date.now() - otpData.timestamp > otpData.expiresIn) {
-        alert('OTP has expired. Please request a new code.');
-        otpData = null;
-        showView('forgot-password-view');
-        return;
+    try {
+        const res  = await apiCall('/api/verify-otp', 'POST', { email: otpData.email, code: entered });
+        const data = await res.json();
+
+        if (!data.success) { showError('otp-code'); alert(data.message); return; }
+
+        const display = document.getElementById('reset-email-display');
+        if (display) display.textContent = otpData.email;
+
+        clearPasswordField('reset-password');
+        clearPasswordField('reset-confirm-password');
+        showView('reset-password-view');
+
+    } catch {
+        alert('Could not reach the server. Please try again.');
     }
-
-    if (entered !== otpData.code) {
-        showError('otp-code');
-        alert('Invalid verification code. Please try again.');
-        return;
-    }
-
-    const display = document.getElementById('reset-email-display');
-    if (display) display.textContent = otpData.email;
-
-    clearPasswordField('reset-password');
-    clearPasswordField('reset-confirm-password');
-    showView('reset-password-view');
 }
 
 async function resetPassword() {
@@ -256,10 +265,10 @@ async function resetPassword() {
     }
 }
 
-function resendOTP() {
+async function resendOTP() {
     if (otpData?.email) {
         document.getElementById('forgot-email').value = otpData.email;
-        sendOTP();
+        await sendOTP();
     }
 }
 
