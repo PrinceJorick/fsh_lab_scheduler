@@ -104,6 +104,7 @@ function startPolling() {
             renderReservationsList();
         } else {
             renderTimeSlots();
+            renderMyReservations();
         }
     }, 5000);
 }
@@ -165,6 +166,7 @@ function initializeUserView() {
     document.getElementById('admin-calendar-controls').style.display = 'none';
 
     renderTimeSlots();
+    renderMyReservations();
 
     document.getElementById('reservation-form')
         ?.addEventListener('submit', handleReservationSubmit);
@@ -254,7 +256,7 @@ async function handleReservationSubmit(e) {
         renderCalendar();
 
     } catch (err) {
-        alert('Could not reach the server. Please try again.');
+        alert('Error: ' + (err.message || 'Could not reach the server.'));
         console.error(err);
     } finally {
         if (submitBtn) {
@@ -271,6 +273,251 @@ function resetReservationForm() {
     document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
     document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
     updateFormState();
+}
+
+// ============================================================================
+// MY RESERVATIONS — teacher can view and edit their own reservations
+// ============================================================================
+
+function renderMyReservations() {
+    const userEmail = localStorage.getItem('fsh_user_email');
+    const myReservations = reservationsCache
+        .filter(r => r.lab === currentLab && r.requester === userEmail)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Create or find the my-reservations section
+    let section = document.getElementById('my-reservations-section');
+    if (!section) {
+        section = document.createElement('div');
+        section.id = 'my-reservations-section';
+        section.className = 'reservation-form';
+        section.style.marginTop = '20px';
+        document.getElementById('user-view')?.appendChild(section);
+    }
+
+    if (myReservations.length === 0) {
+        section.innerHTML = '';
+        return;
+    }
+
+    section.innerHTML = `
+        <h3 style="margin-bottom: 16px;"><i class="fas fa-history"></i> My Reservations</h3>
+        <div id="my-reservations-list"></div>
+    `;
+
+    const list = document.getElementById('my-reservations-list');
+    myReservations.forEach(r => {
+        const canEdit = r.status === 'pending' || r.status === 'approved';
+        const statusColor = r.status === 'approved' ? '#22c55e' : r.status === 'declined' ? '#ef4444' : '#f59e0b';
+
+        const item = document.createElement('div');
+        item.style.cssText = `
+            background: var(--hover-bg); border-radius: 12px; padding: 16px;
+            margin-bottom: 12px; border-left: 4px solid ${statusColor};
+        `;
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+                <div>
+                    <p style="font-weight:600; margin-bottom:4px; color:var(--text-color);">
+                        <i class="far fa-calendar" style="margin-right:6px;"></i>${formatDate(r.date)}
+                    </p>
+                    <p style="font-size:13px; color:var(--secondary-text); margin-bottom:2px;">
+                        <i class="far fa-clock" style="margin-right:6px;"></i>${r.timeSlot}
+                    </p>
+                    <p style="font-size:13px; color:var(--secondary-text); margin-bottom:2px;">
+                        <i class="fas fa-book" style="margin-right:6px;"></i>${r.subject} — Grade ${r.grade}
+                    </p>
+                    <p style="font-size:13px; color:var(--secondary-text);">
+                        <i class="fas fa-users" style="margin-right:6px;"></i>${r.students} students
+                    </p>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <span style="padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;
+                        background:${statusColor}; color:white; text-transform:uppercase;">${r.status}</span>
+                    ${canEdit ? `
+                        <button onclick="openEditModal('${r.id}')" style="
+                            background:#081316; color:white; border:none; border-radius:20px;
+                            padding:6px 14px; font-size:12px; cursor:pointer; display:flex;
+                            align-items:center; gap:6px; transition:all 0.2s;">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        ${r.status === 'approved' ? `
+                        <span style="font-size:10px; color:var(--secondary-text); text-align:right; max-width:100px; line-height:1.3;">
+                            Will require re-approval
+                        </span>` : ''}
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function openEditModal(reservationId) {
+    const r = reservationsCache.find(r => r.id === reservationId);
+    if (!r) return;
+
+    document.getElementById('edit-reservation-modal')?.remove();
+    document.body.style.overflow = 'hidden';
+
+    const modal = document.createElement('div');
+    modal.id = 'edit-reservation-modal';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px; box-sizing: border-box; overflow-y: auto;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: var(--card-bg); border-radius: 20px; width: 100%;
+            max-width: 480px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow-y: auto; max-height: 90vh; margin: auto;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+                padding: 20px 25px;
+                display: flex; justify-content: space-between; align-items: center;
+            ">
+                <h2 style="color:white; margin:0; font-size:1.1rem; font-weight:600;">
+                    <i class="fas fa-edit" style="margin-right:8px;"></i>Edit Reservation
+                </h2>
+                <button onclick="closeEditModal()" style="
+                    background: rgba(255,255,255,0.2); border: none; color: white;
+                    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+                    font-size: 14px; display: flex; align-items: center; justify-content: center;
+                "><i class="fas fa-times"></i></button>
+            </div>
+            <form id="edit-reservation-form" style="padding: 20px; display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Date</label>
+                    <input type="date" id="edit-date" class="login-input" value="${r.date}" required
+                        min="${new Date().toISOString().split('T')[0]}" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Time Slot</label>
+                    <select id="edit-timeslot" class="login-input" required style="margin:0;">
+                        ${TIME_SLOTS.map(slot => `<option value="${slot}" ${slot === r.timeSlot ? 'selected' : ''}>${slot}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Teacher's Name</label>
+                    <input type="text" id="edit-teacher-name" class="login-input" value="${r.teacherName || ''}" required style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Subject</label>
+                    <select id="edit-subject" class="login-input" required style="margin:0;">
+                        <option value="">Select subject</option>
+                        ${['General Biology','Physics','Chemistry','ETECH'].map(s =>
+                            `<option value="${s}" ${s === r.subject ? 'selected' : ''}>${s}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Grade Level</label>
+                    <select id="edit-grade" class="login-input" required style="margin:0;">
+                        <option value="">Select grade level</option>
+                        <option value="11" ${r.grade == '11' ? 'selected' : ''}>Grade 11</option>
+                        <option value="12" ${r.grade == '12' ? 'selected' : ''}>Grade 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Number of Students</label>
+                    <input type="number" id="edit-students" class="login-input" value="${r.students}" required min="1" max="50" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Purpose / Activity</label>
+                    <textarea id="edit-purpose" class="login-input" required style="margin:0; min-height:80px; resize:vertical; font-family:inherit;">${r.purpose}</textarea>
+                </div>
+                ${r.status === 'approved' ? `
+                <div style="background:rgba(245,158,11,0.1); border:1px solid #f59e0b; border-radius:10px;
+                    padding:10px 14px; font-size:13px; color:#b45309; display:flex; gap:8px; align-items:flex-start;">
+                    <i class="fas fa-exclamation-triangle" style="flex-shrink:0; margin-top:2px;"></i>
+                    <span>Saving will reset this reservation to <strong>pending</strong> status and require admin re-approval.</span>
+                </div>` : ''}
+                <div style="display:flex; gap:10px; padding-top:4px;">
+                    <button type="button" onclick="closeEditModal()" style="
+                        flex:1; padding:11px; border-radius:50px; cursor:pointer;
+                        background:transparent; color:var(--secondary-text);
+                        border:1px solid var(--secondary-text); font-size:14px; font-weight:500;
+                    ">Cancel</button>
+                    <button type="submit" id="edit-submit-btn" style="
+                        flex:1; padding:11px; border-radius:50px; cursor:pointer;
+                        background:#081316; color:white; border:none;
+                        font-size:14px; font-weight:500; display:flex;
+                        align-items:center; justify-content:center; gap:8px;
+                    "><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeEditModal(); });
+    document.getElementById('edit-reservation-form').addEventListener('submit', e => {
+        handleEditSubmit(e, reservationId);
+    });
+}
+
+function closeEditModal() {
+    document.getElementById('edit-reservation-modal')?.remove();
+    document.body.style.overflow = '';
+}
+
+async function handleEditSubmit(e, reservationId) {
+    e.preventDefault();
+
+    const newDate     = document.getElementById('edit-date').value;
+    const newTimeSlot = document.getElementById('edit-timeslot').value;
+
+    // Check for conflicts (excluding this reservation itself)
+    const conflict = reservationsCache.some(r =>
+        r.id !== reservationId &&
+        r.date === newDate &&
+        r.timeSlot === newTimeSlot &&
+        r.lab === currentLab &&
+        (r.status === 'approved' || r.status === 'pending')
+    );
+
+    if (conflict) {
+        alert('That date and time slot is already taken. Please choose a different one.');
+        return;
+    }
+
+    const submitBtn = document.getElementById('edit-submit-btn');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
+
+    try {
+        const data = await apiCall(`/api/reservations/${reservationId}`, 'PATCH', {
+            date:        newDate,
+            timeSlot:    newTimeSlot,
+            teacherName: document.getElementById('edit-teacher-name').value,
+            subject:     document.getElementById('edit-subject').value,
+            grade:       document.getElementById('edit-grade').value,
+            students:    document.getElementById('edit-students').value,
+            purpose:     document.getElementById('edit-purpose').value,
+            status:      'pending',  // always reset to pending so admin must re-approve
+        });
+
+        if (!data.success) {
+            alert(data.message || 'Failed to update reservation.');
+            return;
+        }
+
+        closeEditModal();
+        await fetchReservations();
+        renderCalendar();
+        renderMyReservations();
+        renderTimeSlots();
+        alert('✅ Reservation updated successfully!\n\nYour reservation has been resubmitted for admin approval.');
+
+    } catch (err) {
+        alert('Error: ' + (err.message || 'Could not reach the server.'));
+        console.error(err);
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes'; }
+    }
 }
 
 function updateFormState() {
@@ -402,7 +649,7 @@ async function approveReservation(id) {
         renderCalendar();
         alert('✅ Reservation approved! The teacher has been notified.');
     } catch (err) {
-        alert('Could not reach the server. Please try again.');
+        alert('Error: ' + (err.message || 'Could not reach the server.'));
         console.error(err);
     }
 }
@@ -419,7 +666,7 @@ async function declineReservation(id) {
         renderCalendar();
         alert('❌ Reservation declined. The teacher has been notified.');
     } catch (err) {
-        alert('Could not reach the server. Please try again.');
+        alert('Error: ' + (err.message || 'Could not reach the server.'));
         console.error(err);
     }
 }
@@ -732,3 +979,5 @@ window.declineReservation     = declineReservation;
 window.goBackToDashboard      = goBackToDashboard;
 window.highlightDateFromMail  = highlightDateFromMail;
 window.renderReservationsList = renderReservationsList;
+window.openEditModal          = openEditModal;
+window.closeEditModal         = closeEditModal;

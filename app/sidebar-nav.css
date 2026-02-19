@@ -66,7 +66,7 @@
     position: absolute;
     top: 45px;
     right: 60px;
-    z-index: 1003;
+    z-index: 98;
     background: transparent;
     border: none;
     width: 50px;
@@ -302,12 +302,15 @@
         top: 0;
         left: -220px;
         width: 220px;
-        height: 100vh;
+        height: 100svh; /* scales to actual visible browser height */
         background-color: var(--nav-bg);
         box-shadow: 2px 0 10px var(--shadow);
         z-index: 1000;
-        padding: 30px 15px;
+        padding: 30px 15px 15px;
         transition: left 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .dash-nav.active {
@@ -322,7 +325,9 @@
         align-items: center;
         gap: 25px;
         padding: 0;
-        height: 100%;
+        flex: 1;           /* fill available height */
+        min-height: 0;     /* allow shrinking */
+        overflow: hidden;
     }
 
     .dash-nav img[src*="fsh_logo"] {
@@ -330,6 +335,7 @@
         height: 50px;
         object-fit: contain;
         margin-bottom: 15px;
+        flex-shrink: 0;
         content: url('../public/fsh_logo_colored.png');
     }
 
@@ -340,8 +346,10 @@
         gap: 12px;
         width: 100%;
         margin-top: auto;
-        padding-top: 25px;
+        padding-top: 15px;
+        padding-bottom: 5px;
         border-top: 1px solid var(--hover-bg);
+        flex-shrink: 0;    /* never compress nav-right out of view */
     }
 
     #user-display {

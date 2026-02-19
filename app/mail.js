@@ -221,6 +221,28 @@ async function openMessage(notificationId) {
         }
     }
 
+    // Edit button for teachers on their own pending/approved reservations.
+    // Teachers only receive notifications about their own reservations, so no
+    // extra email ownership check is needed beyond the role check.
+    const isTeacher = !isAdmin;
+    const canTeacherEdit = isTeacher && notif.reservationId &&
+        (notif.status === 'pending' || notif.status === 'approved');
+
+    const editBtn = canTeacherEdit ? `
+        <div class="message-actions" style="flex-direction:column; gap:0;">
+            <button class="action-btn view-lab" onclick="openEditModalFromMail('${notif.reservationId}', '${notif.lab}')"
+                style="background:var(--text-color); color:var(--bg-color); border-color:var(--text-color); ${notif.status === 'approved' ? 'border-radius:50px 50px 0 0;' : ''}">
+                <i class="fas fa-edit"></i> Edit Reservation
+            </button>
+            ${notif.status === 'approved' ? `
+            <div style="background:rgba(245,158,11,0.15); border:1px solid #f59e0b; border-top:none; border-radius:0 0 12px 12px;
+                padding:8px 14px; font-size:13px; color:#d97706; display:flex; gap:8px; align-items:center;">
+                <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
+                Editing will reset status to <strong style="margin-left:3px;">pending</strong> and require re-approval.
+            </div>` : ''}
+        </div>
+    ` : '';
+
     // Admin action buttons for pending requests
     const adminActions = isAdmin && isPending ? `
         <div class="message-actions">
@@ -275,6 +297,7 @@ async function openMessage(notificationId) {
         </div>
         ${reservationDetails}
         ${adminActions}
+        ${editBtn}
         ${viewLabBtn}
     `;
 
@@ -353,12 +376,168 @@ function formatDate(dateString) {
 }
 
 function getTimeAgo(dateString) {
-    const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+    // Ensure timestamp is treated as UTC (append Z if no timezone info present)
+    const utcString = dateString && !dateString.endsWith('Z') && !dateString.includes('+') ? dateString + 'Z' : dateString;
+    const seconds = Math.floor((new Date() - new Date(utcString)) / 1000);
     if (seconds < 60)     return 'Just now';
     if (seconds < 3600)   return `${Math.floor(seconds / 60)} minutes ago`;
     if (seconds < 86400)  return `${Math.floor(seconds / 3600)} hours ago`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
     return formatDate(dateString);
+}
+
+const TIME_SLOTS_MAIL = [
+    '07:00 AM - 08:00 AM','08:00 AM - 09:00 AM','09:00 AM - 10:00 AM',
+    '10:00 AM - 11:00 AM','11:00 AM - 12:00 PM','01:00 PM - 02:00 PM',
+    '02:00 PM - 03:00 PM','03:00 PM - 04:00 PM','04:00 PM - 05:00 PM',
+    '05:00 PM - 06:00 PM'
+];
+
+async function openEditModalFromMail(reservationId, labName) {
+    // Fetch the reservation data first
+    let r = null;
+    try {
+        const data = await mailApiCall(`/api/reservations?lab=${encodeURIComponent(labName)}`);
+        if (data.success) r = data.reservations.find(res => res.id === reservationId);
+    } catch (err) { console.error(err); }
+
+    if (!r) { alert('Could not load reservation data.'); return; }
+
+    closeMessageModal();
+    document.getElementById('mail-edit-modal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'mail-edit-modal';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px; box-sizing: border-box;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: var(--card-bg); border-radius: 20px; width: 100%;
+            max-width: 480px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow-y: auto; max-height: 90vh; margin: auto;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #081316 0%, #2a3a3f 100%);
+                padding: 20px 25px;
+                display: flex; justify-content: space-between; align-items: center;
+            ">
+                <h2 style="color:white; margin:0; font-size:1.1rem; font-weight:600;">
+                    <i class="fas fa-edit" style="margin-right:8px;"></i>Edit Reservation
+                </h2>
+                <button onclick="closeMailEditModal()" style="
+                    background: rgba(255,255,255,0.2); border: none; color: white;
+                    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+                    font-size: 14px; display: flex; align-items: center; justify-content: center;
+                "><i class="fas fa-times"></i></button>
+            </div>
+            <form id="mail-edit-form" style="padding: 20px; display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Date</label>
+                    <input type="date" id="mail-edit-date" class="login-input" value="${r.date}" required
+                        min="${new Date().toISOString().split('T')[0]}" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Time Slot</label>
+                    <select id="mail-edit-timeslot" class="login-input" required style="margin:0;">
+                        ${TIME_SLOTS_MAIL.map(s => `<option value="${s}" ${s === r.timeSlot ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Teacher's Name</label>
+                    <input type="text" id="mail-edit-teacher" class="login-input" value="${r.teacherName || ''}" required style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Subject</label>
+                    <select id="mail-edit-subject" class="login-input" required style="margin:0;">
+                        <option value="">Select subject</option>
+                        ${['General Biology','Physics','Chemistry','ETECH'].map(s =>
+                            `<option value="${s}" ${s === r.subject ? 'selected' : ''}>${s}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Grade Level</label>
+                    <select id="mail-edit-grade" class="login-input" required style="margin:0;">
+                        <option value="">Select grade</option>
+                        <option value="11" ${r.grade == '11' ? 'selected' : ''}>Grade 11</option>
+                        <option value="12" ${r.grade == '12' ? 'selected' : ''}>Grade 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Number of Students</label>
+                    <input type="number" id="mail-edit-students" class="login-input" value="${r.students}" required min="1" max="50" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:13px; font-weight:500; color:var(--secondary-text); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Purpose / Activity</label>
+                    <textarea id="mail-edit-purpose" class="login-input" required
+                        style="margin:0; min-height:80px; resize:vertical; font-family:inherit;">${r.purpose}</textarea>
+                </div>
+                ${r.status === 'approved' ? `
+                <div style="background:rgba(245,158,11,0.08); border-left:4px solid #f59e0b; border-radius:0 4px 4px 0;
+                    padding:10px 14px; font-size:13px; color:#b45309; display:flex; gap:8px; align-items:flex-start;">
+                    <i class="fas fa-exclamation-triangle" style="flex-shrink:0; margin-top:2px;"></i>
+                    <span>Saving will reset this reservation to <strong>pending</strong> status and require admin re-approval.</span>
+                </div>` : ''}
+                <div style="display:flex; gap:10px; padding-top:4px;">
+                    <button type="button" onclick="closeMailEditModal()" style="
+                        flex:1; padding:11px; border-radius:50px; cursor:pointer;
+                        background:transparent; color:var(--secondary-text);
+                        border:1px solid var(--secondary-text); font-size:14px; font-weight:500;
+                    ">Cancel</button>
+                    <button type="submit" id="mail-edit-submit" style="
+                        flex:1; padding:11px; border-radius:50px; cursor:pointer;
+                        background:#081316; color:white; border:none;
+                        font-size:14px; font-weight:500; display:flex;
+                        align-items:center; justify-content:center; gap:8px;
+                    "><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    modal.addEventListener('click', e => { if (e.target === modal) closeMailEditModal(); });
+
+    document.getElementById('mail-edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('mail-edit-submit');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
+
+        try {
+            const data = await mailApiCall(`/api/reservations/${reservationId}`, 'PATCH', {
+                date:        document.getElementById('mail-edit-date').value,
+                timeSlot:    document.getElementById('mail-edit-timeslot').value,
+                teacherName: document.getElementById('mail-edit-teacher').value,
+                subject:     document.getElementById('mail-edit-subject').value,
+                grade:       document.getElementById('mail-edit-grade').value,
+                students:    document.getElementById('mail-edit-students').value,
+                purpose:     document.getElementById('mail-edit-purpose').value,
+                status:      'pending',
+            });
+
+            if (!data.success) { alert(data.message || 'Failed to update.'); return; }
+
+            closeMailEditModal();
+            await loadMessages();
+            alert('✅ Reservation updated and resubmitted for approval!');
+        } catch (err) {
+            alert('Could not reach the server. Please try again.');
+            console.error(err);
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes'; }
+        }
+    });
+}
+
+function closeMailEditModal() {
+    document.getElementById('mail-edit-modal')?.remove();
+    document.body.style.overflow = '';
 }
 
 function goBackToDashboard() { window.location.href = 'dashboard.html'; }
@@ -377,3 +556,5 @@ window.approveReservationFromMail = approveReservationFromMail;
 window.rejectReservationFromMail  = rejectReservationFromMail;
 window.goBackToDashboard          = goBackToDashboard;
 window.viewScheduleInLaboratory   = viewScheduleInLaboratory;
+window.openEditModalFromMail      = openEditModalFromMail;
+window.closeMailEditModal         = closeMailEditModal;

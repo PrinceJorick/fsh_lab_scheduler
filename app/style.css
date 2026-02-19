@@ -444,17 +444,9 @@ nav img[src*="fsh_logo"] {
    DASHBOARD NAVIGATION
    ============================================================================ */
 
+/* .dash-nav layout is fully controlled by sidebar-nav.css */
 .dash-nav {
-    background-color: var(--nav-bg); 
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    display: flex;
-    align-items: center; 
-    padding: 30px 5%;
-    box-shadow: 0 2px 10px var(--shadow); 
+    background-color: var(--nav-bg);
 }
 
 .dash-nav nav {
@@ -1264,7 +1256,7 @@ nav img[src*="fsh_logo"] {
     }
 
     .dashboard-container {
-        padding-top: 140px;
+        padding-top: 80px;
     }
 
     .calendar-container,
