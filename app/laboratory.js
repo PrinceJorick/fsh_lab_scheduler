@@ -313,10 +313,10 @@ function renderMyReservations() {
         const item = document.createElement('div');
         item.style.cssText = `
             background: var(--hover-bg); border-radius: 12px; padding: 16px;
-            margin-bottom: 12px; border-left: 4px solid ${statusColor};
+            margin-bottom: 12px; border-left: 4px solid ${statusColor}; overflow: hidden;
         `;
         item.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
                 <div>
                     <p style="font-weight:600; margin-bottom:4px; color:var(--text-color);">
                         <i class="far fa-calendar" style="margin-right:6px;"></i>${formatDate(r.date)}
@@ -331,20 +331,20 @@ function renderMyReservations() {
                         <i class="fas fa-users" style="margin-right:6px;"></i>${r.students} students
                     </p>
                 </div>
-                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0;">
                     <span style="padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;
-                        background:${statusColor}; color:white; text-transform:uppercase;">${r.status}</span>
+                        background:${statusColor}; color:white; text-transform:uppercase; flex-shrink:0;">${r.status}</span>
                     ${canEdit ? `
-                        <button onclick="openEditModal('${r.id}')" style="
-                            background:#081316; color:white; border:none; border-radius:20px;
-                            padding:6px 14px; font-size:12px; cursor:pointer; display:flex;
-                            align-items:center; gap:6px; transition:all 0.2s;">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        ${r.status === 'approved' ? `
-                        <span style="font-size:10px; color:var(--secondary-text); text-align:right; max-width:100px; line-height:1.3;">
-                            Will require re-approval
-                        </span>` : ''}
+                        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                            ${r.status === 'approved' ? `
+                            <span style="font-size:11px; color:var(--secondary-text); line-height:1.3; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Will require re-approval</span>` : ''}
+                            <button onclick="openEditModal('${r.id}')" style="
+                                background:#081316; color:white; border:none; border-radius:20px;
+                                padding:6px 14px; font-size:12px; cursor:pointer; display:flex;
+                                align-items:center; gap:6px; transition:all 0.2s; flex-shrink:0;">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
                     ` : ''}
                 </div>
             </div>
@@ -372,7 +372,7 @@ function openEditModal(reservationId) {
     modal.innerHTML = `
         <div style="
             background: var(--card-bg); border-radius: 20px; width: 100%;
-            max-width: 480px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             overflow-y: auto; max-height: 90vh; margin: auto;
         ">
             <div style="

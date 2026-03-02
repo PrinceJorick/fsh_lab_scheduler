@@ -190,7 +190,10 @@ function initializeMailButton() {
     mailButton.setAttribute('title', 'Notifications');
     
     mailButton.innerHTML = `
-        <img src="../public/Mail.png" alt="Mail">
+        <svg class="nav-icon mail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="none">
+            <rect x="12" y="28" width="76" height="50" rx="6" stroke="currentColor" stroke-width="6"/>
+            <polyline points="12,28 50,58 88,28" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
+        </svg>
         <span class="notification-badge" id="notification-badge">0</span>
     `;
     

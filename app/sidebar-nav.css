@@ -13,6 +13,7 @@
     --hover-bg: #f0f0f0;
     --shadow: rgba(0, 0, 0, 0.05);
     --shadow-hover: rgba(0, 0, 0, 0.12);
+    --icon-inner: #ffffff;
 }
 
 [data-theme="dark"] {
@@ -25,6 +26,13 @@
     --hover-bg: #3a3a3a;
     --shadow: rgba(0, 0, 0, 0.3);
     --shadow-hover: rgba(0, 0, 0, 0.5);
+    --icon-inner: #2a2a2a;
+}
+
+/* Inline SVG icons — match hamburger menu aesthetic */
+.nav-icon {
+    color: var(--text-color);
+    display: block;
 }
 
 /* Profile section with label */
@@ -39,13 +47,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
+    border: 3px solid var(--text-color);
     border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .profile-link:hover {
-    transform: scale(1.1);
+    background: var(--hover-bg);
+    transform: scale(1.05);
 }
 
 .profile-link img {
@@ -64,32 +78,24 @@
 /* Mail/Notifications Button - Top right corner */
 .mail-button {
     position: absolute;
-    top: 45px;
+    top: 38px;
     right: 60px;
     z-index: 98;
     background: transparent;
     border: none;
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 62px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    padding: 0;
-}
-
-[data-theme="dark"] .mail-button {
-    background: transparent;
+    padding: 4px;
 }
 
 .mail-button:hover {
-    transform: scale(1.1);
-}
-
-[data-theme="dark"] .mail-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .mail-button img {
@@ -102,14 +108,10 @@
     display: none;
 }
 
-[data-theme="dark"] .mail-button i {
-    display: none;
-}
-
 .notification-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 2px;
+    right: 2px;
     background: #ef4444;
     color: white;
     font-size: 10px;
@@ -238,6 +240,18 @@
         background: rgba(255, 255, 255, 0.1);
         border-color: white;
     }
+
+    body[data-page="laboratory"] .mail-button .nav-icon,
+    body[data-page="mail"] .mail-button .nav-icon,
+    body[data-page="profile"] .mail-button .nav-icon {
+        color: white;
+    }
+
+    body[data-page="laboratory"] .mail-button:hover,
+    body[data-page="mail"] .mail-button:hover,
+    body[data-page="profile"] .mail-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
 }
 
 .menu-toggle:hover {
@@ -258,17 +272,9 @@
     pointer-events: none;
 }
 
-/* Dark mode glow effects for sidebar logo and profile icon */
+/* Dark mode glow effects for sidebar logo */
 [data-theme="dark"] .dash-nav img[src*="fsh_logo"] {
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-}
-
-[data-theme="dark"] .profile-link img {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-}
-
-[data-theme="dark"] .mail-button img {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
 .tab-text {
@@ -300,8 +306,8 @@
     .dash-nav {
         position: fixed;
         top: 0;
-        left: -220px;
-        width: 220px;
+        left: -160px;
+        width: 160px;
         height: 100svh; /* scales to actual visible browser height */
         background-color: var(--nav-bg);
         box-shadow: 2px 0 10px var(--shadow);
@@ -418,13 +424,14 @@
         top: -100%;
         left: 0;
         width: 100%;
-        height: auto;
-        max-height: 40vh;
+        height: 100px;
         z-index: 1000;
-        padding: 40px 5% 30px 5%;
+        padding: 0 5%;
         box-shadow: 0 4px 20px var(--shadow);
         transition: top 0.3s ease;
         overflow-y: auto;
+        display: flex;
+        align-items: center;
     }
 
     .dash-nav.active {
@@ -435,28 +442,30 @@
         position: static;
         width: 100%;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
+        justify-content: space-between;
         padding: 0;
-        gap: 20px;
+        gap: 15px;
     }
 
     .dash-nav img[src*="fsh_logo"] {
-        width: 40px;
-        height: 40px;
+        width: 55px;
+        height: 55px;
         object-fit: contain;
-        margin-bottom: 5px;
         content: url('../public/fsh_logo_colored.png');
     }
 
     .nav-right {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding-top: 15px;
-        border-top: 1px solid var(--hover-bg);
+        gap: 15px;
+        padding-top: 0;
+        border-top: none;
+        border-left: 1px solid var(--hover-bg);
+        padding-left: 15px;
+        margin-left: auto;
     }
 
     #user-display {
@@ -464,6 +473,22 @@
         font-weight: 500;
         text-align: center;
         color: var(--text-color);
+    }
+
+    .profile-section {
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .profile-label,
+    .theme-label {
+        display: none;
+    }
+
+    .theme-toggle-container {
+        flex-direction: row;
+        gap: 0;
     }
 
     .profile-link {

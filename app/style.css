@@ -637,6 +637,7 @@ nav img[src*="fsh_logo"] {
     padding: 30px;
     box-shadow: 0 4px 20px var(--shadow);
     margin-bottom: 30px;
+    overflow: hidden;
 }
 
 .calendar-header {
@@ -1263,7 +1264,16 @@ nav img[src*="fsh_logo"] {
     .time-slots-container,
     .reservation-form,
     .admin-panel {
-        padding: 20px;
+        padding: 15px;
+    }
+
+    .calendar-grid {
+        gap: 3px;
+    }
+
+    .calendar-day-header {
+        padding: 6px 2px;
+        font-size: 11px;
     }
 
     .calendar-controls {
@@ -1288,10 +1298,6 @@ nav img[src*="fsh_logo"] {
 
     .view-btn i {
         font-size: 14px;
-    }
-
-    .calendar-grid {
-        gap: 5px;
     }
 
     .calendar-day {

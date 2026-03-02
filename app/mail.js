@@ -231,15 +231,13 @@ async function openMessage(notificationId) {
     const editBtn = canTeacherEdit ? `
         <div class="message-actions" style="flex-direction:column; gap:0;">
             <button class="action-btn view-lab" onclick="openEditModalFromMail('${notif.reservationId}', '${notif.lab}')"
-                style="background:var(--text-color); color:var(--bg-color); border-color:var(--text-color); ${notif.status === 'approved' ? 'border-radius:50px 50px 0 0;' : ''}">
+                style="background:var(--text-color); color:var(--bg-color); border-color:var(--text-color);">
                 <i class="fas fa-edit"></i> Edit Reservation
             </button>
             ${notif.status === 'approved' ? `
-            <div style="background:rgba(245,158,11,0.15); border:1px solid #f59e0b; border-top:none; border-radius:0 0 12px 12px;
-                padding:8px 14px; font-size:13px; color:#d97706; display:flex; gap:8px; align-items:center;">
-                <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
-                Editing will reset status to <strong style="margin-left:3px;">pending</strong> and require re-approval.
-            </div>` : ''}
+            <p style="margin:8px 0 0; font-size:12px; color:var(--secondary-text); text-align:center;">
+                <i class="fas fa-info-circle" style="margin-right:4px;"></i>Editing will reset status to <strong>pending</strong> and require re-approval.
+            </p>` : ''}
         </div>
     ` : '';
 
@@ -302,10 +300,12 @@ async function openMessage(notificationId) {
     `;
 
     document.getElementById('message-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 function closeMessageModal() {
     document.getElementById('message-modal').style.display = 'none';
+    document.body.style.overflow = '';
     currentMessageId = null;
 }
 
@@ -380,9 +380,12 @@ function getTimeAgo(dateString) {
     const utcString = dateString && !dateString.endsWith('Z') && !dateString.includes('+') ? dateString + 'Z' : dateString;
     const seconds = Math.floor((new Date() - new Date(utcString)) / 1000);
     if (seconds < 60)     return 'Just now';
-    if (seconds < 3600)   return `${Math.floor(seconds / 60)} minutes ago`;
-    if (seconds < 86400)  return `${Math.floor(seconds / 3600)} hours ago`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (seconds < 3600)   return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    const hours = Math.floor(seconds / 3600);
+    if (seconds < 86400)  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    const days = Math.floor(seconds / 86400);
+    if (seconds < 604800) return `${days} ${days === 1 ? 'day' : 'days'} ago`;
     return formatDate(dateString);
 }
 
@@ -418,7 +421,7 @@ async function openEditModalFromMail(reservationId, labName) {
     modal.innerHTML = `
         <div style="
             background: var(--card-bg); border-radius: 20px; width: 100%;
-            max-width: 480px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             overflow-y: auto; max-height: 90vh; margin: auto;
         ">
             <div style="
@@ -478,11 +481,9 @@ async function openEditModalFromMail(reservationId, labName) {
                         style="margin:0; min-height:80px; resize:vertical; font-family:inherit;">${r.purpose}</textarea>
                 </div>
                 ${r.status === 'approved' ? `
-                <div style="background:rgba(245,158,11,0.08); border-left:4px solid #f59e0b; border-radius:0 4px 4px 0;
-                    padding:10px 14px; font-size:13px; color:#b45309; display:flex; gap:8px; align-items:flex-start;">
-                    <i class="fas fa-exclamation-triangle" style="flex-shrink:0; margin-top:2px;"></i>
-                    <span>Saving will reset this reservation to <strong>pending</strong> status and require admin re-approval.</span>
-                </div>` : ''}
+                <p style="margin:0; font-size:12px; color:var(--secondary-text); text-align:center;">
+                    <i class="fas fa-info-circle" style="margin-right:4px;"></i>Saving will reset this reservation to <strong>pending</strong> status and require admin re-approval.
+                </p>` : ''}
                 <div style="display:flex; gap:10px; padding-top:4px;">
                     <button type="button" onclick="closeMailEditModal()" style="
                         flex:1; padding:11px; border-radius:50px; cursor:pointer;
