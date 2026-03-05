@@ -1,0 +1,48 @@
+/* ============================================================================
+   TRANSITIONS.CSS — Smooth page fade with FSH logo
+   ============================================================================ */
+
+#fsh-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    /* No transition by default — overlay snaps visible instantly on departure */
+    pointer-events: all;
+}
+
+#fsh-transition-overlay[data-theme-overlay="dark"] {
+    background: #1a1a1a;
+}
+
+/* Only apply the slow fade when we're fading OUT (arrival) */
+#fsh-transition-overlay.fsh-fading {
+    transition: opacity 0.55s ease;
+}
+
+#fsh-transition-overlay.fsh-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Logo ── */
+#fsh-transition-overlay img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    animation: fsh-pulse 1.2s ease-in-out infinite;
+}
+
+#fsh-transition-overlay[data-theme-overlay="dark"] img {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5))
+            drop-shadow(0 0 28px rgba(255, 255, 255, 0.25));
+}
+
+@keyframes fsh-pulse {
+    0%, 100% { opacity: 1;   transform: scale(1);    }
+    50%       { opacity: 0.4; transform: scale(0.88); }
+}

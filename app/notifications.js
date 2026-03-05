@@ -195,7 +195,7 @@ function showToastNotification(notification) {
     `;
 
     toast.onclick = function(e) {
-        if (e.target.tagName !== 'BUTTON') window.location.href = 'mail.html';
+        if (e.target.tagName !== 'BUTTON') fshNavigate('mail.html');
     };
 
     container.appendChild(toast);

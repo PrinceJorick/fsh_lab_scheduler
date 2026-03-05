@@ -11,6 +11,7 @@ function showView(viewId) {
         'selection-view',
         'login-view',
         'signup-view',
+        'signup-verify-view',
         'signup-password-view',
         'forgot-password-view',
         'otp-view',
@@ -147,7 +148,7 @@ function initializeDashboard() {
     const role = localStorage.getItem('fsh_user_role');
 
     if (!email) {
-        window.location.href = "index.html";
+        fshNavigate("index.html");
         return;
     }
 
@@ -160,7 +161,7 @@ function initializeDashboard() {
 
 function logout() {
     localStorage.clear();
-    window.location.href = "index.html";
+    fshNavigate("index.html");
 }
 
 function selectLab(labName) {

@@ -23,19 +23,19 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 
 async function requireSession() {
     const token = getToken();
-    if (!token) { window.location.href = 'index.html'; return null; }
+    if (!token) { fshNavigate('index.html'); return null; }
 
     try {
         const res  = await apiCall('/api/session', 'GET');
         const data = await res.json();
-        if (!data.success) { clearSession(); window.location.href = 'index.html'; return null; }
+        if (!data.success) { clearSession(); fshNavigate('index.html'); return null; }
         localStorage.setItem('fsh_user_email', data.user.email);
         localStorage.setItem('fsh_user_role',  data.user.role);
         return data.user;
     } catch {
         const email = localStorage.getItem('fsh_user_email');
         const role  = localStorage.getItem('fsh_user_role');
-        if (!email) { window.location.href = 'index.html'; return null; }
+        if (!email) { fshNavigate('index.html'); return null; }
         return { email, role };
     }
 }
@@ -184,7 +184,7 @@ function updatePasswordIconVisibility(id) {
     if (input && icon) icon.style.display = input.value.length > 0 ? 'block' : 'none';
 }
 
-function goBackToDashboard() { window.location.href = 'dashboard.html'; }
+function goBackToDashboard() { fshNavigate('dashboard.html'); }
 
 async function logout() {
     if (!confirm('Are you sure you want to logout?')) return;
@@ -192,7 +192,7 @@ async function logout() {
     await apiCall('/api/logout', 'POST').catch(() => {});
     clearSession();
     localStorage.removeItem('fsh_last_unread_count'); // ← Clear notification count
-    window.location.href = 'index.html';
+    fshNavigate('index.html');
 }
 
 window.showChangePassword  = showChangePassword;

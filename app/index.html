@@ -18,8 +18,10 @@
                 window.location.replace('dashboard.html');
             }
         </script>
+        <link rel="stylesheet" href="transitions.css">
     </head>
     <body>
+    <script src="transitions.js"></script>
         <nav>
             <img src="../public/fsh_logo_colored.png">
         </nav>
@@ -88,6 +90,33 @@
 
                     <div class="back-navigation">
                         <button class="back-btn" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Signup View - Email Verification Step -->
+                <div id="signup-verify-view">
+                    <h2 class="login-subtext">Verify your email</h2>
+                    <p style="font-size: 14px; color: #707475; margin-bottom: 5px;" id="signup-verify-email-display"></p>
+                    <p style="font-size: 13px; color: #707475; margin-bottom: 20px;">If your email is correct, check your inbox for the 6-digit verification code or click the link in the email.</p>
+
+                    <p id="signup-verify-sent-message" style="display: none; font-size: 14px; color: #22c55e; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-check-circle"></i> Verification code sent to your email!
+                    </p>
+
+                    <input type="text" id="signup-verify-code" class="login-input" placeholder="Enter 6-digit code" maxlength="6">
+
+                    <button class="enter-btn" onclick="verifySignupCode()">Verify Email</button>
+
+                    <p style="font-size: 14px; color: #707475; margin-top: 15px;">
+                        Didn't receive code?
+                        <a href="#" onclick="resendVerificationCode(); return false;" style="color: #081316; font-weight: 500; text-decoration: none;">Resend</a>
+                    </p>
+
+                    <div class="back-navigation">
+                        <button class="back-btn" onclick="showView('signup-view')">
                             <i class="fas fa-arrow-left"></i>
                             <span>Back</span>
                         </button>
@@ -203,6 +232,23 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const savedTheme = localStorage.getItem('fsh_theme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
+
+                // Handle email verify link click (?verify=CODE&email=EMAIL)
+                const params = new URLSearchParams(window.location.search);
+                const verifyCode  = params.get('verify');
+                const verifyEmail = params.get('email');
+                if (verifyCode && verifyEmail) {
+                    confirmedEmail = verifyEmail;
+                    const display = document.getElementById('signup-verify-email-display');
+                    if (display) display.textContent = verifyEmail;
+                    const input = document.getElementById('signup-verify-code');
+                    if (input) input.value = verifyCode;
+                    // Clear URL params so refreshing doesn't re-trigger this
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    showView('signup-verify-view');
+                    // Auto-verify after short delay so the view is visible first
+                    setTimeout(verifySignupCode, 500);
+                }
             });
         </script>
     </body>

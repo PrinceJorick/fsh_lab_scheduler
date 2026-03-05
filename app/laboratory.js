@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const email = localStorage.getItem('fsh_user_email');
     const role  = localStorage.getItem('fsh_user_role');
 
-    if (!email) { window.location.href = 'index.html'; return; }
+    if (!email) { fshNavigate('index.html'); return; }
 
     // Update user display
     const userDisplay = document.getElementById('user-display');
@@ -807,7 +807,7 @@ function renderDailyView() {
 
     const monthYear      = document.getElementById('current-month-year');
     const adminMonthYear = document.getElementById('admin-month-year');
-    const label = currentDay.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const label = currentDay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     if (monthYear)      monthYear.textContent      = label;
     if (adminMonthYear) adminMonthYear.textContent = label;
 
@@ -819,13 +819,18 @@ function renderDailyView() {
     const isPast  = currentDay < new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const role    = localStorage.getItem('fsh_user_role');
 
-    const dayEl   = document.createElement('div');
-    dayEl.className = 'calendar-day daily-view-day';
-    dayEl.textContent = currentDay.getDate();
+    const dayEl = document.createElement('div');
+    dayEl.className = 'calendar-day daily-view';
 
     if (currentDay.toDateString() === today.toDateString()) dayEl.classList.add('today');
     if (dateStr === selectedDate) dayEl.classList.add('selected');
     if (hasReservations(dateStr)) dayEl.classList.add('has-reservations');
+
+    // Full date on top, large number below
+    dayEl.innerHTML = `
+        <span class="daily-full-date">${currentDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', year: 'numeric' })}</span>
+        <span class="daily-day-number">${currentDay.getDate()}</span>
+    `;
 
     if (role === 'Admin') {
         dayEl.onclick = () => handleAdminDateClick(dateStr, dayEl);
@@ -935,7 +940,7 @@ function formatDateForStorage(date) {
     return `${y}-${m}-${d}`;
 }
 
-function goBackToDashboard() { window.location.href = 'dashboard.html'; }
+function goBackToDashboard() { fshNavigate('dashboard.html'); }
 
 function highlightDateFromMail(dateString, timeSlot) {
     const targetDate = new Date(dateString);

@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const email = localStorage.getItem('fsh_user_email');
     const role  = localStorage.getItem('fsh_user_role');
 
-    if (!email) { window.location.href = 'index.html'; return; }
+    if (!email) { fshNavigate('index.html'); return; }
 
     // Update user display
     const userDisplay = document.getElementById('user-display');
@@ -541,12 +541,12 @@ function closeMailEditModal() {
     document.body.style.overflow = '';
 }
 
-function goBackToDashboard() { window.location.href = 'dashboard.html'; }
+function goBackToDashboard() { fshNavigate('dashboard.html'); }
 
 function viewScheduleInLaboratory(labName, date, timeSlot) {
     closeMessageModal();
     const params = new URLSearchParams({ lab: labName, date, timeSlot, fromMail: 'true' });
-    window.location.href = `laboratory.html?${params.toString()}`;
+    fshNavigate(`laboratory.html?${params.toString()}`);
 }
 
 // ── Expose globals ────────────────────────────────────────────────────────────

@@ -50,7 +50,7 @@ async function handleCredentialResponse(response) {
         localStorage.setItem('fsh_token',      data.token);
         localStorage.setItem('fsh_user_email', data.user.email);
         localStorage.setItem('fsh_user_role',  data.user.role);
-        window.location.href = "dashboard.html";
+        fshNavigate("dashboard.html");
 
     } catch (err) {
         alert("Could not reach the server. Please try again.");
