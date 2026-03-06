@@ -476,19 +476,29 @@
     }
 
     .profile-section {
-        flex-direction: row;
-        gap: 8px;
+        flex-direction: column;
+        gap: 0;
         align-items: center;
+        justify-content: space-between;
+        height: 58px;
     }
 
     .profile-label,
     .theme-label {
-        display: none;
+        display: block;
+        font-size: 11px;
     }
 
     .theme-toggle-container {
-        flex-direction: row;
+        flex-direction: column;
         gap: 0;
+        align-items: center;
+        justify-content: space-between;
+        height: 58px;
+    }
+
+    .theme-toggle-container .theme-toggle {
+        margin-top: 5px;
     }
 
     .profile-link {

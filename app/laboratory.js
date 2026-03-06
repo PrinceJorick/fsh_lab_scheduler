@@ -16,6 +16,7 @@ let selectedTimeSlot = null;
 let currentLab      = '';
 let reservationsCache = []; // local cache updated by polling
 let pollingInterval = null;
+let adminSelectedDate = null; // tracks which date admin is viewing (null = all)
 
 // Time slots available for reservation
 const TIME_SLOTS = [
@@ -101,7 +102,12 @@ function startPolling() {
 
         const role = localStorage.getItem('fsh_user_role');
         if (role === 'Admin') {
-            renderReservationsList();
+            if (adminSelectedDate) {
+                const dayReservations = reservationsCache.filter(r => r.date === adminSelectedDate && r.lab === currentLab);
+                showAdminDayReservations(adminSelectedDate, dayReservations);
+            } else {
+                renderReservationsList();
+            }
         } else {
             renderTimeSlots();
             renderMyReservations();
@@ -856,6 +862,7 @@ function handleDateSelect(dateStr, dayEl) {
 function handleAdminDateClick(dateStr, dayEl) {
     document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
     dayEl.classList.add('selected');
+    adminSelectedDate = dateStr;
 
     const dayReservations = reservationsCache.filter(r => r.date === dateStr && r.lab === currentLab);
     showAdminDayReservations(dateStr, dayReservations);
@@ -866,13 +873,20 @@ function showAdminDayReservations(dateStr, reservations) {
     if (!container) return;
 
     container.innerHTML = `
-        <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid var(--hover-bg);">
+        <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid var(--hover-bg); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <h4 style="color:var(--text-color); margin:0;">
                 <i class="far fa-calendar"></i> ${formatDate(dateStr)}
                 <span style="font-size:13px; color:var(--secondary-text); margin-left:10px; font-weight:400;">
                     ${reservations.length} reservation${reservations.length !== 1 ? 's' : ''}
                 </span>
             </h4>
+            <button onclick="viewAllReservations()" style="
+                background:#081316; color:white; border:none; border-radius:50px;
+                padding:8px 18px; font-size:13px; font-weight:500; cursor:pointer;
+                display:flex; align-items:center; gap:6px; transition:all 0.2s;
+            ">
+                <i class="fas fa-list"></i> View All Reservations
+            </button>
         </div>
     `;
 
@@ -972,6 +986,12 @@ function highlightDateFromMail(dateString, timeSlot) {
     }, 100);
 }
 
+function viewAllReservations() {
+    adminSelectedDate = null;
+    document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+    renderReservationsList();
+}
+
 // Stop polling when leaving the page
 window.addEventListener('beforeunload', stopPolling);
 
@@ -986,3 +1006,4 @@ window.highlightDateFromMail  = highlightDateFromMail;
 window.renderReservationsList = renderReservationsList;
 window.openEditModal          = openEditModal;
 window.closeEditModal         = closeEditModal;
+window.viewAllReservations    = viewAllReservations;
