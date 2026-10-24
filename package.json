@@ -1,0 +1,13 @@
+{
+  "name": "fsh-lab-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node --check backend/worker.js && node --check api/handler.js && node --check app/demo.js"
+  },
+  "dependencies": {
+    "pg": "8.16.3"
+  }
+}

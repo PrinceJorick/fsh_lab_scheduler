@@ -3,7 +3,7 @@
 // Polls the Worker API every 5 seconds for new notifications
 // ============================================================================
 
-const NOTIF_API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+const NOTIF_API_BASE = '';
 
 let notifPollingInterval = null;
 

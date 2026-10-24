@@ -5,7 +5,7 @@
 
 // ── Change this to your deployed Worker URL ──────────────────────────────────
 // It will look like: https://fsh-api.YOUR-SUBDOMAIN.workers.dev
-const API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+const API_BASE = '';
 
 // ── Token helpers ─────────────────────────────────────────────────────────────
 function saveSession(token, user) {

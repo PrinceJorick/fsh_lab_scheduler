@@ -4,7 +4,7 @@
 // It registers the service worker and subscribes the user to push notifications
 // ============================================================================
 
-const PUSH_API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+const PUSH_API_BASE = '';
 
 // ============================================================================
 // MAIN INIT — call once per page load after user is confirmed logged in

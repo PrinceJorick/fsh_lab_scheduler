@@ -2,7 +2,7 @@
 // PROFILE.JS — Cloudflare Workers Version
 // ============================================================================
 
-const API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev'; // ← same as auth.js
+const API_BASE = ''; // ← same as auth.js
 
 // ── Token helpers (mirrors auth.js) ──────────────────────────────────────────
 function getToken()     { return localStorage.getItem('fsh_token'); }
@@ -49,6 +49,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!user) return;
 
     loadProfileInfo(user.email, user.role);
+    if (window.fshDemo?.active()) {
+        const card = document.getElementById('security-settings-card');
+        const description = card?.querySelector('.card-description');
+        const button = card?.querySelector('.change-password-btn');
+        const accountDescription = document.querySelector('.settings-card .logout-btn')?.closest('.settings-card')?.querySelector('.card-description');
+        if (description) description.textContent = 'Password changes require a live account.';
+        if (accountDescription) accountDescription.textContent = 'Leave the demo and clear its sample data.';
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Unavailable in demo';
+        }
+    }
     setupPasswordChangeForm();
     setupPasswordInputListeners();
 
@@ -82,13 +94,19 @@ function loadProfileInfo(email, role) {
 // CHANGE PASSWORD
 // ============================================================================
 
+let passwordDialogTrigger = null;
+
 function showChangePassword() {
     const modal = document.getElementById('change-password-modal');
     if (modal) {
+        passwordDialogTrigger = document.activeElement;
         modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
         document.getElementById('change-password-form')?.reset();
         clearAllPasswordErrors();
         hideAllPasswordToggles();
+        document.getElementById('current-password')?.focus();
     }
 }
 
@@ -96,9 +114,12 @@ function closeChangePassword() {
     const modal = document.getElementById('change-password-modal');
     if (modal) {
         modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
         document.getElementById('change-password-form')?.reset();
         clearAllPasswordErrors();
         hideAllPasswordToggles();
+        passwordDialogTrigger?.focus();
     }
 }
 
@@ -106,6 +127,26 @@ window.onclick = function(event) {
     const modal = document.getElementById('change-password-modal');
     if (event.target === modal) closeChangePassword();
 };
+
+document.addEventListener('keydown', event => {
+    const modal = document.getElementById('change-password-modal');
+    if (!modal || modal.getAttribute('aria-hidden') !== 'false') return;
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeChangePassword();
+    } else if (event.key === 'Tab') {
+        const controls = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled])')];
+        const first = controls[0];
+        const last = controls.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+        }
+    }
+});
 
 function setupPasswordChangeForm() {
     document.getElementById('change-password-form')
@@ -187,7 +228,11 @@ function updatePasswordIconVisibility(id) {
 function goBackToDashboard() { fshNavigate('dashboard.html'); }
 
 async function logout() {
-    if (!confirm('Are you sure you want to logout?')) return;
+    if (!confirm('Log out of this workspace?')) return;
+    if (window.fshDemo?.active()) {
+        window.fshDemo.exit();
+        return;
+    }
     await unsubscribePushNotifications();
     await apiCall('/api/logout', 'POST').catch(() => {});
     clearSession();

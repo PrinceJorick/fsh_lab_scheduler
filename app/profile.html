@@ -3,7 +3,9 @@
     <head>
         <title>Profile - FSH Lab Scheduler</title>
         <meta charset="utf-8">
+        <link rel="icon" href="../public/fsh_logo_colored.png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="theme.js"></script>
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="sidebar-nav.css">
         <link rel="stylesheet" href="profile-styles.css">
@@ -13,13 +15,16 @@
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <link rel="stylesheet" href="transitions.css">
+        <link rel="stylesheet" href="refined.css">
+        <script src="demo.js"></script>
+        <script src="feedback.js"></script>
     </head>
     <body>
     <script src="transitions.js"></script>
         <div class="dashboard-container">
             <header class="dash-nav">
                 <nav>
-                    <a href="dashboard.html"><img src="../public/fsh_logo_colored.png"></a>
+                    <a href="dashboard.html" class="dashboard-brand" aria-label="Dashboard home"><img src="../public/fsh_logo_colored.png" alt="Fidelis Senior High logo"><span>FSH Lab Scheduler</span></a>
                     <div class="nav-right">
                         <p id="user-display"></p>
                         <div class="profile-section">
@@ -61,7 +66,7 @@
                     </div>
 
                     <!-- Change Password Card -->
-                    <div class="settings-card">
+                    <div class="settings-card" id="security-settings-card">
                         <h3><i class="fas fa-lock"></i> Security</h3>
                         <p class="card-description">Update your password to keep your account secure</p>
                         
@@ -78,7 +83,7 @@
                         
                         <button class="logout-btn" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
-                            Logout
+                            Log out
                         </button>
                     </div>
                 </div>
@@ -86,11 +91,11 @@
         </div>
 
         <!-- Change Password Modal -->
-        <div id="change-password-modal" class="modal">
+        <div id="change-password-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="change-password-title" aria-hidden="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Change Password</h2>
-                    <button class="modal-close" onclick="closeChangePassword()">
+                    <h2 id="change-password-title">Change Password</h2>
+                    <button class="modal-close" type="button" aria-label="Close password dialog" onclick="closeChangePassword()">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>

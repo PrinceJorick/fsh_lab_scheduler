@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Dashboard</title>
+        <title>Explore laboratories · FSH Lab Scheduler</title>
         <meta charset="utf-8">
+        <link rel="icon" href="../public/fsh_logo_colored.png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="theme.js"></script>
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="sidebar-nav.css">
         <meta name="description" content="">
@@ -12,13 +14,16 @@
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <link rel="stylesheet" href="transitions.css">
+        <link rel="stylesheet" href="refined.css">
+        <script src="demo.js"></script>
+        <script src="feedback.js"></script>
     </head>
     <body>
     <script src="transitions.js"></script>
         <div class="dashboard-container">
             <header class="dash-nav">
                 <nav>
-                    <img src="../public/fsh_logo_colored.png" style="cursor: default;">
+                    <a href="dashboard.html" class="dashboard-brand" aria-label="Dashboard home"><img src="../public/fsh_logo_colored.png" alt="Fidelis Senior High logo"><span>FSH Lab Scheduler</span></a>
                     <div class="nav-right">
                         <p id="user-display"></p>
                         <div class="profile-section">
@@ -32,47 +37,50 @@
             </header>
 
             <main class="main-content">
-                <header>
-                    <h1 id="welcome-title">Dashboard</h1>
+                <header class="dashboard-intro">
+                    <div><p class="section-label">Laboratory spaces</p><h1 id="welcome-title">Find your next space.</h1><p class="intro-copy">Choose a room to view its schedule and request a time for your class.</p></div>
+                    <div class="dashboard-count"><strong>05</strong><span>labs across<br>three floors</span></div>
                 </header>
+                <div class="lab-toolbar"><label for="lab-search">Search laboratories</label><div class="lab-search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="lab-search" type="search" placeholder="Search by room or floor" autocomplete="off"></div><span id="lab-result-count" aria-live="polite">5 rooms</span></div>
 
                 <div class="lab-grid">
-                    <div class="lab-card" onclick="fshNavigate('laboratory.html?lab=Computer Laboratory 1')">
+                    <a class="lab-card" href="laboratory.html?lab=Computer%20Laboratory%201">
                         <img src="../public/Computer_Laboratory.jpg" alt="Computer Laboratory 1" class="lab-image">
                         <div class="lab-info">
                             <span>First floor</span>
-                            <h3>Computer Laboratory 1</h3>
+                            <h3>Computer Laboratory 1 <span aria-hidden="true">↗</span></h3>
                         </div>
-                    </div>
-                    <div class="lab-card" onclick="fshNavigate('laboratory.html?lab=Computer Laboratory 2')">
+                    </a>
+                    <a class="lab-card" href="laboratory.html?lab=Computer%20Laboratory%202">
                         <img src="../public/Computer_Laboratory.jpg" alt="Computer Laboratory 2" class="lab-image">
                         <div class="lab-info">
                             <span>First floor</span>
-                            <h3>Computer Laboratory 2</h3>
+                            <h3>Computer Laboratory 2 <span aria-hidden="true">↗</span></h3>
                         </div>
-                    </div>
-                    <div class="lab-card" onclick="fshNavigate('laboratory.html?lab=Biology Laboratory')">
+                    </a>
+                    <a class="lab-card" href="laboratory.html?lab=Biology%20Laboratory">
                         <img src="../public/Biology_Laboratory.png" alt="Biology Laboratory" class="lab-image">
                         <div class="lab-info">
                             <span>Second floor</span>
-                            <h3>Biology Laboratory</h3>
+                            <h3>Biology Laboratory <span aria-hidden="true">↗</span></h3>
                         </div>
-                    </div>
-                    <div class="lab-card" onclick="fshNavigate('laboratory.html?lab=General Science Laboratory')">
+                    </a>
+                    <a class="lab-card" href="laboratory.html?lab=General%20Science%20Laboratory">
                         <img src="../public/General_Science_Laboratory.jpg" alt="General Science Laboratory" class="lab-image">
                         <div class="lab-info">
                             <span>Third floor</span>
-                            <h3>General Science Laboratory</h3>
+                            <h3>General Science Laboratory <span aria-hidden="true">↗</span></h3>
                         </div>
-                    </div>
-                    <div class="lab-card" onclick="fshNavigate('laboratory.html?lab=Physics Laboratory')">
+                    </a>
+                    <a class="lab-card" href="laboratory.html?lab=Physics%20Laboratory">
                         <img src="../public/Physics_Laboratory.jpg" alt="Physics Laboratory" class="lab-image">
                         <div class="lab-info">
                             <span>Third floor</span>
-                            <h3>Physics Laboratory</h3>
+                            <h3>Physics Laboratory <span aria-hidden="true">↗</span></h3>
                         </div>
-                    </div>                   
+                    </a>
                 </div>
+                <p class="lab-no-results" id="lab-no-results" hidden>No laboratories match that search.</p>
             </main>
         </div>
         
@@ -81,5 +89,6 @@
         <script src="notifications.js"></script>
         <script src="ui.js"></script>
         <script src="session-timeout.js"></script>
+        <script src="dashboard-search.js"></script>
     </body>
 </html>

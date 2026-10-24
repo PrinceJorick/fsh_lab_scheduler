@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeSidebar() {
+    // The refreshed layout uses an always-visible, responsive top navigation.
+    if (document.querySelector('.dash-nav')) return;
     // Create hamburger button
     const menuToggle = document.createElement('button');
     menuToggle.className = 'menu-toggle';
@@ -99,37 +101,20 @@ function initializeSidebar() {
 // ============================================================================
 
 function initializeDarkMode() {
-    // One-time migration: clear any auto-saved theme that was never manually
-    // chosen, so the device theme takes over for existing users too.
-    const savedTheme = localStorage.getItem('fsh_theme');
-    const userManuallyToggled = localStorage.getItem('fsh_theme_manual');
-    if (savedTheme && !userManuallyToggled) {
-        localStorage.removeItem('fsh_theme');
-    }
-
-    // If the user has never manually set a theme, follow the device
-    if (!localStorage.getItem('fsh_theme')) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-    } else {
-        // User has a saved preference — respect it
-        document.documentElement.setAttribute('data-theme', localStorage.getItem('fsh_theme'));
-    }
-    
-    // Listen for device theme changes while the app is open
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        // Only auto-switch if the user hasn't manually set a preference
-        if (!localStorage.getItem('fsh_theme')) {
-            document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-            // Update the toggle slider icon too
-            const sliders = document.querySelectorAll('.theme-toggle-slider i');
-            sliders.forEach(icon => {
-                icon.className = `fas ${e.matches ? 'fa-moon' : 'fa-sun'}`;
-            });
-        }
-    });
-    
     createThemeToggle();
+    window.addEventListener('fsh-theme-change', updateThemeToggle);
+    updateThemeToggle();
+}
+
+function updateThemeToggle() {
+    const dark = window.fshTheme?.current() === 'dark';
+    document.querySelectorAll('.theme-toggle').forEach(button => {
+        button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        button.setAttribute('aria-pressed', String(dark));
+        button.title = window.fshTheme?.isAutomatic() ? 'Following device appearance' : 'Appearance set manually';
+        const icon = button.querySelector('i');
+        if (icon) icon.className = `fas ${dark ? 'fa-moon' : 'fa-sun'}`;
+    });
 }
 
 function createThemeToggle() {
@@ -142,8 +127,9 @@ function createThemeToggle() {
         themeContainer.className = 'theme-toggle-container';
         
         // Create the toggle switch
-        const themeToggle = document.createElement('div');
+        const themeToggle = document.createElement('button');
         themeToggle.className = 'theme-toggle';
+        themeToggle.type = 'button';
         themeToggle.setAttribute('aria-label', 'Toggle Dark Mode');
         
         // Read current active theme from the DOM (already set by initializeDarkMode)
@@ -179,18 +165,8 @@ function createThemeToggle() {
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('fsh_theme', newTheme);
-    localStorage.setItem('fsh_theme_manual', '1'); // Mark as manually chosen
-    
-    // Update all toggle sliders
-    const sliders = document.querySelectorAll('.theme-toggle-slider i');
-    sliders.forEach(icon => {
-        icon.className = `fas ${newTheme === 'dark' ? 'fa-moon' : 'fa-sun'}`;
-    });
+    const currentTheme = window.fshTheme?.current();
+    window.fshTheme?.set(currentTheme === 'dark' ? 'light' : 'dark');
 }
 
 // Make function globally available
@@ -225,7 +201,7 @@ function initializeMailButton() {
     `;
     
     // Insert button into DOM
-    document.body.insertBefore(mailButton, document.body.firstChild);
+    document.querySelector('.dash-nav .nav-right')?.appendChild(mailButton);
 }
 
 // Make functions globally available

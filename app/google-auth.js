@@ -7,40 +7,15 @@
 // ============================================================================
 
 async function handleCredentialResponse(response) {
-    const responsePayload = decodeJwtResponse(response.credential);
-
-    if (responsePayload.hd !== 'firstasia.edu.ph') {
-        alert("Access Denied: Please sign in with your school email (@firstasia.edu.ph).");
-        return;
-    }
-
     if (!selectedRole) selectedRole = "Teacher";
 
-    const API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
-
     try {
-        let res = await fetch(`${API_BASE}/api/login`, {
+        const res = await fetch('/api/google-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: responsePayload.email,
-                password: responsePayload.sub
-            })
+            body: JSON.stringify({ credential: response.credential, role: selectedRole })
         });
         let data = await res.json();
-
-        if (!data.success && data.message.includes('No account')) {
-            res = await fetch(`${API_BASE}/api/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email:    responsePayload.email,
-                    password: responsePayload.sub,
-                    role:     selectedRole
-                })
-            });
-            data = await res.json();
-        }
 
         if (!data.success) {
             alert("Sign-in failed: " + data.message);
@@ -80,8 +55,7 @@ function decodeJwtResponse(token) {
 // ============================================================================
 
 function getGoogleButtonTheme() {
-    const savedTheme = localStorage.getItem('fsh_theme') || 'light';
-    return savedTheme === 'dark' ? 'outline' : 'filled_black';
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'outline' : 'filled_black';
 }
 
 let buttonsRendered = false;
@@ -136,11 +110,5 @@ window.onload = function () {
     // 2. Render once layout is painted to get correct container width
     requestAnimationFrame(() => setTimeout(renderGoogleButtons, 100));
 
-    // Re-render only when theme is toggled (force = true resets the flag)
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.theme-toggle')) {
-            buttonsRendered = false;
-            setTimeout(() => renderGoogleButtons(true), 50);
-        }
-    });
+    window.addEventListener('fsh-theme-change', () => renderGoogleButtons(true));
 };

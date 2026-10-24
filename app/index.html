@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+cc<!DOCTYPE html>
 <html>
     <head>
         <title>FSH Lab Scheduler</title>
         <meta charset="utf-8">
+        <link rel="icon" href="../public/fsh_logo_colored.png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="theme.js"></script>
         <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="google-auth.css">
-        <meta name="description" content="">
+        <meta name="description" content="Find and reserve Fidelis Senior High laboratories with a clear, shared schedule.">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script>
             // Redirect to dashboard if already logged in
             if (localStorage.getItem('fsh_token')) {
@@ -19,38 +19,39 @@
             }
         </script>
         <link rel="stylesheet" href="transitions.css">
+        <link rel="stylesheet" href="refined.css">
+        <script src="demo.js"></script>
+        <script src="feedback.js"></script>
     </head>
     <body>
     <script src="transitions.js"></script>
         <nav>
-            <img src="../public/fsh_logo_colored.png">
+            <a class="brand" href="index.html" aria-label="FSH Laboratory Scheduler home"><img src="../public/fsh_logo_colored.png" alt="Fidelis Senior High logo"><span>Fidelis Senior High<br><strong>Lab Scheduler</strong></span></a>
         </nav>
 
         <div class="main-container">
             <div class="content">
-                <h1>Fidelis Senior High</h1>
-                <h2>Laboratory Scheduler</h2>
+                <span class="login-kicker">A better way to share our labs</span>
+                <h1>Make room for<br>what's next.</h1>
+                <h2>Explore availability, request a time, and keep every class on track.</h2>
 
                 <!-- Role Selection View -->
                 <div id="selection-view">
-                    <p>Choose occupancy</p>
+                    <p>Continue as</p>
                     <div class="toggle">
-                        <button onclick="handleSelection(this)">Teacher</button>
-                        <button onclick="handleSelection(this)">Admin</button>
+                        <button type="button" onclick="handleSelection(this)">Teacher</button>
+                        <button type="button" onclick="handleSelection(this)">Admin</button>
                     </div>
+                    <button class="demo-entry" type="button" onclick="fshDemo.start('Teacher')"><span class="demo-entry-icon" aria-hidden="true">↗</span><span><strong>Explore demo</strong><small>Try the scheduler with sample data. No account needed.</small></span></button>
                 </div>
 
                 <!-- Login View -->
                 <div id="login-view">
                     <h2 class="login-subtext">Sign in to continue</h2>
 
-                    <div id="buttonDiv-login"></div>
-
-                    <div class="divider">or</div>
-
-                    <input type="email" id="login-email" class="login-input" placeholder="Email">
+                    <label class="sr-only" for="login-email">School email</label><input type="email" id="login-email" class="login-input" placeholder="School email" autocomplete="username">
                     <div class="password-container">
-                        <input type="password" id="login-password" class="login-input" placeholder="Password">
+                        <label class="sr-only" for="login-password">Password</label><input type="password" id="login-password" class="login-input" placeholder="Password" autocomplete="current-password">
                         <i class="far fa-eye password-toggle" onclick="togglePassword('login-password', this)"></i>
                     </div>
 
@@ -74,10 +75,6 @@
                 <!-- Signup View - Email Step -->
                 <div id="signup-view">
                     <h2 class="login-subtext">Create your account</h2>
-
-                    <div id="buttonDiv-signup"></div>
-
-                    <div class="divider">or</div>
 
                     <input type="email" id="signup-email" class="login-input" placeholder="Enter your email">
 
@@ -220,19 +217,15 @@
             </div>
 
             <div class="image-container">
-                <img src="../public/nsc_bldg.png">
+                <img src="../public/nsc_bldg.png" alt="Fidelis Senior High campus building">
+                <div class="image-caption"><span>Fidelis Senior High</span><strong>Good planning gives ideas space to grow.</strong></div>
             </div>
         </div>
         
         <script src="auth.js"></script>
         <script src="ui.js"></script>
-        <script src="google-auth.js"></script>
         <script>
-            // Initialize dark mode on login page
             document.addEventListener('DOMContentLoaded', () => {
-                const savedTheme = localStorage.getItem('fsh_theme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-
                 // Handle email verify link click (?verify=CODE&email=EMAIL)
                 const params = new URLSearchParams(window.location.search);
                 const verifyCode  = params.get('verify');

@@ -47,7 +47,7 @@ async function forceLogout(reason = 'inactivity') {
     // Best-effort server logout (don't await — we're leaving)
     const token = localStorage.getItem('fsh_token');
     if (token) {
-        fetch('https://fsh-scheduler.medranowilljairuz.workers.dev/api/logout', {
+        fetch('/api/logout', {
             method:  'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         }).catch(() => {});

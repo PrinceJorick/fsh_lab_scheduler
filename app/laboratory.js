@@ -3,7 +3,7 @@
 // Uses Cloudflare Worker API for real-time sync across users
 // ============================================================================
 
-const API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+const API_BASE = '';
 
 // Global state
 let currentMonth    = new Date().getMonth();
@@ -185,8 +185,10 @@ function renderTimeSlots() {
     container.innerHTML = '';
 
     TIME_SLOTS.forEach(slot => {
-        const slotEl = document.createElement('div');
+        const slotEl = document.createElement('button');
         slotEl.className = 'time-slot';
+        slotEl.type = 'button';
+        slotEl.setAttribute('aria-pressed', slot === selectedTimeSlot ? 'true' : 'false');
 
         const isReserved = selectedDate && isSlotReserved(selectedDate, slot);
 
@@ -195,6 +197,7 @@ function renderTimeSlots() {
             slotEl.innerHTML = `${slot} <span style="font-size:11px;color:#ef4444;">(Reserved)</span>`;
             slotEl.style.cursor  = 'not-allowed';
             slotEl.style.opacity = '0.6';
+            slotEl.disabled = true;
         } else {
             slotEl.textContent = slot;
             slotEl.onclick = () => selectTimeSlot(slot, slotEl);
@@ -212,8 +215,9 @@ function selectTimeSlot(slot, element) {
         return;
     }
 
-    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.time-slot').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
     element.classList.add('selected');
+    element.setAttribute('aria-pressed', 'true');
     selectedTimeSlot = slot;
     updateFormState();
 }
@@ -721,11 +725,14 @@ function renderMonthlyView() {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-        const dayEl   = document.createElement('div');
+        const dayEl   = document.createElement('button');
         dayEl.className = 'calendar-day';
+        dayEl.type = 'button';
         dayEl.textContent = day;
 
         const dateStr = formatDateForStorage(new Date(currentYear, currentMonth, day));
+        dayEl.setAttribute('aria-label', new Date(currentYear, currentMonth, day).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
+        dayEl.setAttribute('aria-pressed', dateStr === selectedDate ? 'true' : 'false');
         const isToday = today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
         const isPast  = new Date(currentYear, currentMonth, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -740,6 +747,7 @@ function renderMonthlyView() {
                 dayEl.classList.add('past');
                 dayEl.style.opacity = '0.4';
                 dayEl.style.cursor  = 'not-allowed';
+                dayEl.disabled = true;
             } else {
                 dayEl.onclick = () => handleDateSelect(dateStr, dayEl);
             }
@@ -781,11 +789,14 @@ function renderWeeklyView() {
     for (let i = 0; i < 7; i++) {
         const d      = new Date(currentWeekStart);
         d.setDate(d.getDate() + i);
-        const dayEl  = document.createElement('div');
+        const dayEl  = document.createElement('button');
         dayEl.className = 'calendar-day';
+        dayEl.type = 'button';
         dayEl.textContent = d.getDate();
 
         const dateStr = formatDateForStorage(d);
+        dayEl.setAttribute('aria-label', d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
+        dayEl.setAttribute('aria-pressed', dateStr === selectedDate ? 'true' : 'false');
         const isToday = d.toDateString() === today.toDateString();
         const isPast  = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -801,6 +812,7 @@ function renderWeeklyView() {
             dayEl.classList.add('past');
             dayEl.style.opacity = '0.4';
             dayEl.style.cursor  = 'not-allowed';
+            dayEl.disabled = true;
         }
 
         calendarGrid.appendChild(dayEl);
@@ -825,8 +837,11 @@ function renderDailyView() {
     const isPast  = currentDay < new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const role    = localStorage.getItem('fsh_user_role');
 
-    const dayEl = document.createElement('div');
+    const dayEl = document.createElement('button');
     dayEl.className = 'calendar-day daily-view';
+    dayEl.type = 'button';
+    dayEl.setAttribute('aria-label', label);
+    dayEl.setAttribute('aria-pressed', dateStr === selectedDate ? 'true' : 'false');
 
     if (currentDay.toDateString() === today.toDateString()) dayEl.classList.add('today');
     if (dateStr === selectedDate) dayEl.classList.add('selected');
@@ -845,14 +860,16 @@ function renderDailyView() {
     } else {
         dayEl.style.opacity = '0.4';
         dayEl.style.cursor  = 'not-allowed';
+        dayEl.disabled = true;
     }
 
     calendarGrid.appendChild(dayEl);
 }
 
 function handleDateSelect(dateStr, dayEl) {
-    document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.calendar-day').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
     dayEl.classList.add('selected');
+    dayEl.setAttribute('aria-pressed', 'true');
     selectedDate     = dateStr;
     selectedTimeSlot = null;
     renderTimeSlots();
@@ -860,8 +877,9 @@ function handleDateSelect(dateStr, dayEl) {
 }
 
 function handleAdminDateClick(dateStr, dayEl) {
-    document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.calendar-day').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
     dayEl.classList.add('selected');
+    dayEl.setAttribute('aria-pressed', 'true');
     adminSelectedDate = dateStr;
 
     const dayReservations = reservationsCache.filter(r => r.date === dateStr && r.lab === currentLab);

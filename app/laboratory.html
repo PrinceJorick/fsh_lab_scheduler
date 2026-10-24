@@ -3,7 +3,9 @@
     <head>
         <title>Laboratory - FSH Lab Scheduler</title>
         <meta charset="utf-8">
+        <link rel="icon" href="../public/fsh_logo_colored.png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="theme.js"></script>
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="sidebar-nav.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,13 +13,16 @@
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <link rel="stylesheet" href="transitions.css">
+        <link rel="stylesheet" href="refined.css">
+        <script src="demo.js"></script>
+        <script src="feedback.js"></script>
     </head>
     <body>
     <script src="transitions.js"></script>
         <div class="dashboard-container">
             <header class="dash-nav">
                 <nav>
-                    <a href="dashboard.html"><img src="../public/fsh_logo_colored.png"></a>
+                    <a href="dashboard.html" class="dashboard-brand" aria-label="Dashboard home"><img src="../public/fsh_logo_colored.png" alt="Fidelis Senior High logo"><span>FSH Lab Scheduler</span></a>
                     <div class="nav-right">
                         <p id="user-display"></p>
                         <div class="profile-section">
@@ -63,22 +68,22 @@
                                 </button>
                             </div>
                             <div class="calendar-nav">
-                                <button onclick="previousMonth()">
+                                <button type="button" aria-label="Previous month" onclick="previousMonth()">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
                                 <span id="current-month-year">January 2024</span>
-                                <button onclick="nextMonth()">
+                                <button type="button" aria-label="Next month" onclick="nextMonth()">
                                     <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="calendar-controls" id="admin-calendar-controls" style="display: none;">
                             <div class="calendar-nav">
-                                <button onclick="previousMonth()">
+                                <button type="button" aria-label="Previous month" onclick="previousMonth()">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
                                 <span id="admin-month-year">January 2024</span>
-                                <button onclick="nextMonth()">
+                                <button type="button" aria-label="Next month" onclick="nextMonth()">
                                     <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>

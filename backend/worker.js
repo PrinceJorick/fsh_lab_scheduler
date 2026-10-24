@@ -4,11 +4,10 @@
 // Bindings to set in Workers dashboard (Settings → Bindings):
 //   DB               = your D1 database (fsh-scheduler)
 //   JWT_SECRET       = any long random string
-//   VAPID_PUBLIC_KEY  = uS7za5yoC3nV-_xrbAAtp3ey1vknCgV0kUGWc-VNXXKaad-0fU6GO5Y-3FQeiWmCpJmj3d68DcV-QLP8XPKhfg
-//   VAPID_PRIVATE_KEY = mmnftH1OhjuWPtxUHolpgqSZo93evA3FfkCz_FzyoX4
+//   VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY = optional web push credentials
 // ============================================================================
 
-const ALLOWED_ORIGIN = 'https://fshschedulercopy.pages.dev';
+const ALLOWED_ORIGIN = 'https://fsh-lab-scheduler.vercel.app';
 
 // ============================================================================
 // ADMIN WHITELIST — only these emails can sign up or log in as Admin
@@ -22,7 +21,7 @@ const ADMIN_WHITELIST = [
 
 function corsHeaders(request) {
     const origin  = request.headers.get('Origin') || '';
-    const allowed = origin === ALLOWED_ORIGIN || origin.startsWith('http://localhost');
+    const allowed = origin === new URL(request.url).origin || origin.startsWith('http://localhost');
     return {
         'Access-Control-Allow-Origin':      allowed ? origin : ALLOWED_ORIGIN,
         'Access-Control-Allow-Methods':     'GET, POST, PATCH, DELETE, OPTIONS',
@@ -128,8 +127,21 @@ async function updatePassword(env, userId, hash) {
     await env.DB.prepare('UPDATE users SET password = ? WHERE id = ?').bind(hash, userId).run();
 }
 function generateId() { return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`; }
-function validateEmail(e) { return e.endsWith('@firstasia.edu.ph') && e.includes('@'); }
+function validateEmail(e) { return typeof e === 'string' && /^[a-z0-9._%+-]+@firstasia\.edu\.ph$/i.test(e); }
 function validatePassword(p) { return typeof p === 'string' && p.length >= 6; }
+const LABS = ['Computer Laboratory 1', 'Computer Laboratory 2', 'Biology Laboratory', 'General Science Laboratory', 'Physics Laboratory'];
+const SLOTS = ['07:00 AM - 08:00 AM', '08:00 AM - 09:00 AM', '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '11:00 AM - 12:00 PM', '01:00 PM - 02:00 PM', '02:00 PM - 03:00 PM', '03:00 PM - 04:00 PM', '04:00 PM - 05:00 PM', '05:00 PM - 06:00 PM'];
+function escapeHTML(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function validReservation(body, includeLab = true) {
+    const { lab, date, timeSlot, teacherName, subject, grade, students, purpose } = body;
+    return (!includeLab || LABS.includes(lab)) && /^\d{4}-\d{2}-\d{2}$/.test(date || '') && SLOTS.includes(timeSlot)
+        && typeof teacherName === 'string' && teacherName.trim().length > 0 && teacherName.length <= 120
+        && typeof subject === 'string' && subject.trim().length > 0 && subject.length <= 100
+        && ['11', '12'].includes(String(grade)) && Number.isInteger(Number(students)) && Number(students) >= 1 && Number(students) <= 50
+        && typeof purpose === 'string' && purpose.trim().length > 0 && purpose.length <= 1000;
+}
 
 // ============================================================================
 // WEB PUSH HELPERS
@@ -282,6 +294,7 @@ function concat(...arrays) {
 }
 
 async function pushToUser(env, toEmail, payload) {
+    if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) return;
     try {
         const subs = await env.DB.prepare(
             `SELECT * FROM push_subscriptions WHERE email = ?`
@@ -327,11 +340,16 @@ async function handleSignup(request, env) {
     if (role === 'Admin' && !ADMIN_WHITELIST.includes(email))
         return json({ success: false, message: 'Access Denied: Your account is not authorized for Admin access.' }, 403, request);
 
+    const verified = await env.DB.prepare('SELECT verified_at FROM otp_codes WHERE email = ?').bind(`signup:${email}`).first();
+    if (!verified?.verified_at || Date.now() - Number(verified.verified_at) > 10 * 60 * 1000)
+        return json({ success: false, message: 'Please verify your school email before creating an account.' }, 403, request);
+
     const existing = await findUserByEmail(env, email);
     if (existing) return json({ success: false, message: 'An account with this email already exists. Please sign in.' }, 409, request);
 
     const hash   = await hashPassword(password);
     const userId = await createUser(env, email, hash, role);
+    await env.DB.prepare('DELETE FROM otp_codes WHERE email = ?').bind(`signup:${email}`).run();
     const token  = await makeToken({ id: userId, email, role }, env.JWT_SECRET);
     return json({ success: true, message: 'Account created.', token, user: { id: userId, email, role } }, 201, request);
 }
@@ -356,6 +374,26 @@ async function handleLogin(request, env) {
 
     const token = await makeToken(user, env.JWT_SECRET);
     return json({ success: true, message: 'Login successful.', token, user: { id: user.id, email: user.email, role: user.role } }, 200, request);
+}
+
+async function handleGoogleLogin(request, env) {
+    const body = await request.json().catch(() => ({}));
+    if (!body.credential || !env.GOOGLE_CLIENT_ID) return json({ success: false, message: 'Google sign-in is unavailable.' }, 503, request);
+    const googleResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(body.credential)}`);
+    const claims = await googleResponse.json().catch(() => ({}));
+    const email = String(claims.email || '').toLowerCase();
+    if (!googleResponse.ok || claims.aud !== env.GOOGLE_CLIENT_ID || String(claims.email_verified) !== 'true' || claims.hd !== 'firstasia.edu.ph' || !validateEmail(email))
+        return json({ success: false, message: 'Use a verified First Asia school Google account.' }, 403, request);
+    const role = body.role === 'Admin' && ADMIN_WHITELIST.includes(email) ? 'Admin' : 'Teacher';
+    let user = await findUserByEmail(env, email);
+    if (!user) {
+        const id = await createUser(env, email, `google:${claims.sub}`, role);
+        user = { id, email, role };
+    }
+    if (user.role === 'Admin' && !ADMIN_WHITELIST.includes(email))
+        return json({ success: false, message: 'Admin access is not authorized.' }, 403, request);
+    const token = await makeToken(user, env.JWT_SECRET);
+    return json({ success: true, token, user: { id: user.id, email, role: user.role } }, 200, request);
 }
 
 async function handleLogout(request, env) {
@@ -421,7 +459,12 @@ async function handleResetPassword(request, env) {
     const user = await findUserByEmail(env, email);
     if (!user) return json({ success: false, message: 'No account found with this email.' }, 404, request);
 
+    const verified = await env.DB.prepare('SELECT verified_at FROM otp_codes WHERE email = ?').bind(email).first();
+    if (!verified?.verified_at || Date.now() - Number(verified.verified_at) > 10 * 60 * 1000)
+        return json({ success: false, message: 'Verify a fresh password reset code first.' }, 403, request);
+
     await updatePassword(env, user.id, await hashPassword(newPassword));
+    await env.DB.prepare('DELETE FROM otp_codes WHERE email = ?').bind(email).run();
     return json({ success: true, message: 'Password reset successfully.' }, 200, request);
 }
 
@@ -477,8 +520,8 @@ async function handleCreateReservation(request, env) {
     const body = await request.json().catch(() => ({}));
     const { lab, date, timeSlot, teacherName, subject, grade, students, purpose } = body;
 
-    if (!lab || !date || !timeSlot || !teacherName || !subject || !grade || !students || !purpose)
-        return json({ success: false, message: 'All reservation fields are required.' }, 400, request);
+    if (!validReservation(body))
+        return json({ success: false, message: 'Check the room, date, time, and reservation details.' }, 400, request);
 
     const conflict = await env.DB.prepare(
         `SELECT id FROM reservations WHERE lab = ? AND date = ? AND time_slot = ? AND status != 'declined'`
@@ -491,7 +534,7 @@ async function handleCreateReservation(request, env) {
     await env.DB.prepare(
         `INSERT INTO reservations (id, lab, date, time_slot, teacher_name, subject, grade, students, purpose, requester, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
-    ).bind(id, lab, date, timeSlot, teacherName, subject, grade, parseInt(students), purpose, sessionUser.email).run();
+    ).bind(id, lab, date, timeSlot, escapeHTML(teacherName.trim()), escapeHTML(subject.trim()), String(grade), Number(students), escapeHTML(purpose.trim()), sessionUser.email).run();
 
     const admins = await env.DB.prepare(`SELECT email FROM users WHERE role = 'Admin'`).all();
     const notifBatch = (admins.results || []).map(admin => {
@@ -502,7 +545,7 @@ async function handleCreateReservation(request, env) {
         ).bind(
             nid, id, sessionUser.email, admin.email,
             `New Lab Request: ${lab}`,
-            `${sessionUser.email.split('@')[0]} has requested ${lab} for ${subject} class.`,
+            `${sessionUser.email.split('@')[0]} has requested ${lab} for ${escapeHTML(subject)} class.`,
             lab, date, timeSlot
         );
     });
@@ -519,7 +562,7 @@ async function handleCreateReservation(request, env) {
             data:  { url: '/mail' }
         });
         // Send email notification to admin
-        await sendReservationRequestEmail(admin.email, sessionUser.email, lab, date, timeSlot, subject, teacherName, env).catch(() => {});
+        await sendReservationRequestEmail(admin.email, sessionUser.email, lab, date, timeSlot, escapeHTML(subject), escapeHTML(teacherName), env).catch(() => {});
     }
 
     return json({ success: true, message: 'Reservation submitted.', id }, 201, request);
@@ -577,8 +620,8 @@ async function handleUpdateReservation(request, env, id) {
             return json({ success: false, message: 'Declined reservations cannot be edited.' }, 400, request);
 
         const { date, timeSlot, teacherName, subject, grade, students, purpose } = body;
-        if (!date || !timeSlot || !teacherName || !subject || !grade || !students || !purpose)
-            return json({ success: false, message: 'All reservation fields are required.' }, 400, request);
+        if (!validReservation({ ...body, lab: reservation.lab }))
+            return json({ success: false, message: 'Check the date, time, and reservation details.' }, 400, request);
 
         // Check for conflicts (excluding this reservation)
         const conflict = await env.DB.prepare(
@@ -589,7 +632,7 @@ async function handleUpdateReservation(request, env, id) {
 
         await env.DB.prepare(
             `UPDATE reservations SET date = ?, time_slot = ?, teacher_name = ?, subject = ?, grade = ?, students = ?, purpose = ?, status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-        ).bind(date, timeSlot, teacherName, subject, grade, parseInt(students), purpose, id).run();
+        ).bind(date, timeSlot, escapeHTML(teacherName.trim()), escapeHTML(subject.trim()), String(grade), Number(students), escapeHTML(purpose.trim()), id).run();
 
         // Notify admins of the edit
         const admins = await env.DB.prepare(`SELECT email FROM users WHERE role = 'Admin'`).all();
@@ -692,6 +735,8 @@ async function handleMarkAllNotificationsRead(request, env) {
 // ============================================================================
 
 async function sendOTPEmail(toEmail, otp, env) {
+    if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL)
+        return { ok: false, error: 'Email delivery is not configured for this project yet.' };
     // Uses Gmail SMTP via Brevo (Sendinblue) free SMTP relay
     // env.SMTP_USER = your Gmail address
     // env.SMTP_PASS = your Gmail App Password
@@ -756,7 +801,7 @@ async function sendReservationRequestEmail(toEmail, requesterEmail, lab, date, t
                         </table>
                         <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center;">
                             <p style="color: #707475; font-size: 13px; margin: 0 0 12px;">Please log in to the FSH Lab Scheduler to approve or decline this request.</p>
-                            <a href="https://fshschedulercopy.pages.dev" style="background: #081316; color: white; padding: 10px 24px; border-radius: 50px; font-size: 13px; font-weight: 600; text-decoration: none;">Open FSH Lab Scheduler</a>
+                            <a href="${env.SITE_URL || ALLOWED_ORIGIN}" style="background: #081316; color: white; padding: 10px 24px; border-radius: 50px; font-size: 13px; font-weight: 600; text-decoration: none;">Open FSH Lab Scheduler</a>
                         </div>
                     </div>
                     <p style="color: #707475; font-size: 12px; text-align: center; margin-top: 20px;">FSH Lab Scheduler — Fidelis Senior High</p>
@@ -812,6 +857,8 @@ async function sendReservationStatusEmail(toEmail, lab, date, timeSlot, approved
 }
 
 async function handleSendOTP(request, env) {
+    if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL)
+        return json({ success: false, message: 'Email delivery is not configured for this project yet.' }, 503, request);
     const body  = await request.json().catch(() => ({}));
     const email = (body.email || '').toLowerCase().trim();
 
@@ -828,7 +875,7 @@ async function handleSendOTP(request, env) {
     await env.DB.prepare(
         `INSERT INTO otp_codes (email, code, expires_at)
          VALUES (?, ?, ?)
-         ON CONFLICT(email) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at`
+         ON CONFLICT(email) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at, verified_at = NULL`
     ).bind(email, otp, expires).run();
 
     const { ok, error } = await sendOTPEmail(email, otp, env);
@@ -854,7 +901,7 @@ async function handleVerifyOTP(request, env) {
     if (record.code !== code)
         return json({ success: false, message: 'Invalid verification code.' }, 400, request);
 
-    await env.DB.prepare(`DELETE FROM otp_codes WHERE email = ?`).bind(email).run();
+    await env.DB.prepare(`UPDATE otp_codes SET verified_at = ? WHERE email = ?`).bind(Date.now(), email).run();
 
     return json({ success: true, message: 'Code verified.' }, 200, request);
 }
@@ -868,7 +915,9 @@ async function handleVerifyOTP(request, env) {
 // ============================================================================
 
 async function sendVerificationEmail(toEmail, code, env) {
-    const verifyLink = `https://fshschedulercopy.pages.dev/index.html?verify=${code}&email=${encodeURIComponent(toEmail)}`;
+    if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL)
+        return { ok: false, error: 'Email delivery is not configured for this project yet.' };
+    const verifyLink = `${env.SITE_URL || ALLOWED_ORIGIN}/index.html?verify=${code}&email=${encodeURIComponent(toEmail)}`;
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json' },
@@ -902,6 +951,8 @@ async function sendVerificationEmail(toEmail, code, env) {
 }
 
 async function handleSendVerification(request, env) {
+    if (!env.BREVO_API_KEY || !env.BREVO_SENDER_EMAIL)
+        return json({ success: false, message: 'Email delivery is not configured for this project yet.' }, 503, request);
     const body  = await request.json().catch(() => ({}));
     const email = (body.email || '').toLowerCase().trim();
 
@@ -920,7 +971,7 @@ async function handleSendVerification(request, env) {
     await env.DB.prepare(
         `INSERT INTO otp_codes (email, code, expires_at)
          VALUES (?, ?, ?)
-         ON CONFLICT(email) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at`
+         ON CONFLICT(email) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at, verified_at = NULL`
     ).bind(`signup:${email}`, code, expires).run();
 
     const { ok, error } = await sendVerificationEmail(email, code, env);
@@ -947,7 +998,7 @@ async function handleVerifySignup(request, env) {
         return json({ success: false, message: 'Invalid verification code.' }, 400, request);
 
     // Clean up
-    await env.DB.prepare(`DELETE FROM otp_codes WHERE email = ?`).bind(`signup:${email}`).run();
+    await env.DB.prepare(`UPDATE otp_codes SET verified_at = ? WHERE email = ?`).bind(Date.now(), `signup:${email}`).run();
 
     return json({ success: true, message: 'Email verified.' }, 200, request);
 }
@@ -963,6 +1014,7 @@ export default {
         // Auth
         if (pathname === '/api/signup'          && request.method === 'POST')  return handleSignup(request, env);
         if (pathname === '/api/login'           && request.method === 'POST')  return handleLogin(request, env);
+        if (pathname === '/api/google-login'    && request.method === 'POST')  return handleGoogleLogin(request, env);
         if (pathname === '/api/logout'          && request.method === 'POST')  return handleLogout(request, env);
         if (pathname === '/api/session'         && request.method === 'GET')   return handleSession(request, env);
         if (pathname === '/api/change-password' && request.method === 'POST')  return handleChangePassword(request, env);

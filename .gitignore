@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.vercel/
+.env*
+!.env.example
+supabase/.temp/
+.playwright-mcp/
+.vercel

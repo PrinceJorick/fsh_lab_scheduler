@@ -4,7 +4,7 @@
 // ============================================================================
 
 (function () {
-    const MIN_DISPLAY_MS = 700; // overlay stays at least this long on arrival
+    const MIN_DISPLAY_MS = 120; // overlay stays at least this long on arrival
 
     // ── Build overlay ─────────────────────────────────────────────────────────
     const overlay = document.createElement('div');
@@ -25,7 +25,7 @@
     }
 
     // Match theme before first paint — no flash of wrong color
-    const theme = localStorage.getItem('fsh_theme') ||
+    const theme = window.fshTheme?.current() ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     overlay.setAttribute('data-theme-overlay', theme);
 

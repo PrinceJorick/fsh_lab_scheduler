@@ -3,7 +3,7 @@
 // Loads from Worker API with 5-second polling for real-time updates
 // ============================================================================
 
-const MAIL_API_BASE = 'https://fsh-scheduler.medranowilljairuz.workers.dev';
+const MAIL_API_BASE = '';
 
 let currentFilter      = 'all';
 let currentMessageId   = null;
@@ -119,6 +119,9 @@ function renderMessages(notifications) {
 function createMessageElement(notification) {
     const div      = document.createElement('div');
     div.className  = `message-item ${notification.status}`;
+    div.setAttribute('role', 'button');
+    div.tabIndex = 0;
+    div.setAttribute('aria-label', `${notification.subject}. ${notification.message}`);
     if (!notification.read) div.classList.add('unread');
 
     const fromName = notification.from.split('@')[0];
@@ -144,6 +147,12 @@ function createMessageElement(notification) {
     `;
 
     div.onclick = () => openMessage(notification.id);
+    div.onkeydown = event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openMessage(notification.id);
+        }
+    };
     return div;
 }
 
